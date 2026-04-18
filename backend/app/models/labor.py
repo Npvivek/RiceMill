@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Numeric, Date, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..database import Base
 
@@ -40,7 +41,6 @@ class AttendanceRecord(Base):
 
     employee = relationship("Employee", foreign_keys=[employee_id])
 
-    from sqlalchemy.orm import relationship
     from sqlalchemy import UniqueConstraint
     __table_args__ = (UniqueConstraint("employee_id", "attendance_date", name="uq_attendance"),)
 
