@@ -12,7 +12,9 @@
       "Bash(npm run *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(xargs sed *)"
+      "Bash(xargs sed *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
