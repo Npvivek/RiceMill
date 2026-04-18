@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m py_compile app/routers/orders.py app/routers/labor.py app/routers/reports.py app/routers/parties.py app/main.py)",
+      "Bash(python3 -m py_compile app/routers/orders.py app/routers/labor.py app/routers/reports.py app/routers/parties.py app/main.py)",
+      "Bash(npx shadcn@latest init --yes)",
+      "Bash(npx shadcn@latest init -y --defaults)",
+      "Bash(npx shadcn@latest add card table badge dialog form input label select textarea separator scroll-area --yes)",
+      "Bash(npx shadcn@latest add dropdown-menu sheet tabs toast --yes)",
+      "Bash(npx shadcn@latest add dropdown-menu sheet tabs sonner --yes)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(xargs sed *)"
+    ]
+  }
+}
