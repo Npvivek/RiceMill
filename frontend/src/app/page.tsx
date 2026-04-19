@@ -71,7 +71,7 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
             <Link href="/products" className="text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Products</Link>
-            <Link href="/contact" className="relative z-10 text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Contact</Link>
+            <Link href="/contact" className="text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Contact</Link>
             <ThemeToggle />
             <Link href="/login">
               <Button size="sm" variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 ml-1">
