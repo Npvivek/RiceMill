@@ -12,15 +12,19 @@ router = APIRouter()
 
 
 class LoginRequest(BaseModel):
-    email: str
+    username: str
     password: str
 
 
 class UserResponse(BaseModel):
     id: int
     name: str
-    email: str
+    username: str
     role: str
+
+    @classmethod
+    def model_validate(cls, obj, **kwargs):
+        return cls(id=obj.id, name=obj.name, username=obj.email, role=obj.role)
 
     class Config:
         from_attributes = True
@@ -28,7 +32,7 @@ class UserResponse(BaseModel):
 
 @router.post("/login")
 def login(body: LoginRequest, response: Response, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == body.email, User.is_active == True).first()
+    user = db.query(User).filter(User.email == body.username, User.is_active == True).first()
     if not user or not verify_password(body.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 

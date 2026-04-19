@@ -20,12 +20,12 @@ export default function LoginPage() {
     const fd = new FormData(e.currentTarget);
     try {
       await api.post("/api/auth/login", {
-        email: fd.get("email"),
+        username: fd.get("username"),
         password: fd.get("password"),
       });
       router.push("/dashboard");
     } catch {
-      toast.error("Invalid email or password");
+      toast.error("Invalid username or password");
     } finally {
       setLoading(false);
     }
@@ -51,8 +51,8 @@ export default function LoginPage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" required autoComplete="email" inputMode="email" />
+                  <Label htmlFor="username">Username</Label>
+                  <Input id="username" name="username" type="text" required autoComplete="username" />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="password">Password</Label>
