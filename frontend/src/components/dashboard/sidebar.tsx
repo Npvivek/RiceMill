@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Package, Wheat, FlaskConical, BarChart3,
-  Users, ShoppingCart, HardHat, FileText, LogOut, Menu
+  LayoutDashboard, Wheat, BarChart3,
+  Users, ShoppingCart, LogOut, Menu, Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -16,21 +16,19 @@ import { useState } from "react";
 const nav = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   {
+    label: "Government", icon: Building2, children: [
+      { label: "Paddy Lots", href: "/dashboard/government/lots" },
+      { label: "Godown Deliveries", href: "/dashboard/government/deliveries" },
+    ]
+  },
+  {
     label: "Inventory", icon: Wheat, children: [
-      { label: "Paddy Batches", href: "/dashboard/inventory/paddy" },
       { label: "Milling Runs", href: "/dashboard/inventory/milling" },
-      { label: "Rice Stock", href: "/dashboard/inventory/stock" },
+      { label: "By-product Stock", href: "/dashboard/inventory/stock" },
     ]
   },
   { label: "Parties", href: "/dashboard/parties", icon: Users },
   { label: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
-  {
-    label: "Labor", icon: HardHat, children: [
-      { label: "Employees", href: "/dashboard/labor/employees" },
-      { label: "Attendance", href: "/dashboard/labor/attendance" },
-      { label: "Wages", href: "/dashboard/labor/wages" },
-    ]
-  },
   { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
 ];
 
@@ -44,13 +42,13 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-4 py-5 border-b border-amber-200">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+      <div className="px-4 py-5 border-b border-amber-200 dark:border-amber-900/50">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🌾</span>
           <div>
-            <p className="font-bold text-sm leading-tight text-amber-900">Panduranga</p>
-            <p className="text-xs text-amber-600">Rice Mill</p>
+            <p className="font-bold text-sm leading-tight text-amber-900 dark:text-amber-300">Panduranga</p>
+            <p className="text-xs text-amber-600 dark:text-amber-500">Rice Mill</p>
           </div>
         </div>
       </div>
@@ -60,7 +58,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           if (item.children) {
             return (
               <div key={item.label} className="mb-1">
-                <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-amber-700 uppercase tracking-wider">
+                <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-500 uppercase tracking-wider">
                   <item.icon className="w-3.5 h-3.5" />
                   {item.label}
                 </div>
@@ -72,8 +70,8 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                     className={cn(
                       "block pl-7 pr-2 py-1.5 text-sm rounded-md transition-colors",
                       pathname === child.href
-                        ? "bg-amber-100 text-amber-900 font-medium"
-                        : "text-gray-600 hover:bg-amber-50 hover:text-amber-900"
+                        ? "bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 font-medium"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-900 dark:hover:text-amber-300"
                     )}
                   >
                     {child.label}
@@ -91,8 +89,8 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               className={cn(
                 "flex items-center gap-2.5 px-2 py-2 text-sm rounded-md transition-colors",
                 pathname === item.href
-                  ? "bg-amber-100 text-amber-900 font-medium"
-                  : "text-gray-600 hover:bg-amber-50 hover:text-amber-900"
+                  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 font-medium"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-900 dark:hover:text-amber-300"
               )}
             >
               <Icon className="w-4 h-4" />
@@ -102,11 +100,11 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-amber-200">
+      <div className="px-3 py-4 border-t border-amber-200 dark:border-amber-900/50">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 text-gray-600 hover:text-red-600 hover:bg-red-50"
+          className="w-full justify-start gap-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
           onClick={handleLogout}
         >
           <LogOut className="w-4 h-4" />
@@ -119,7 +117,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar() {
   return (
-    <aside className="hidden lg:flex lg:flex-col w-56 bg-white border-r border-amber-200 shrink-0">
+    <aside className="hidden lg:flex lg:flex-col w-56 border-r border-amber-200 dark:border-amber-900/50 shrink-0">
       <NavContent />
     </aside>
   );
@@ -133,7 +131,7 @@ export function MobileSidebar() {
         <Menu className="w-5 h-5" />
       </Button>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="p-0 w-56">
+        <SheetContent side="left" className="p-0 w-56 bg-white dark:bg-gray-900">
           <NavContent onNavigate={() => setOpen(false)} />
         </SheetContent>
       </Sheet>

@@ -49,15 +49,15 @@ export default function PartiesPage() {
   }
 
   const typeColor: Record<string, string> = {
-    supplier: "bg-blue-100 text-blue-800",
-    customer: "bg-green-100 text-green-800",
-    both: "bg-purple-100 text-purple-800",
+    supplier: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300",
+    customer: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300",
+    both: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300",
   };
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Parties</h1>
+        <h1 className="text-2xl font-bold text-foreground">Parties</h1>
         <Button size="sm" className="bg-amber-600 hover:bg-amber-700 gap-1.5" onClick={() => setOpen(true)}>
           <Plus className="w-4 h-4" /> Add Party
         </Button>
@@ -115,28 +115,28 @@ export default function PartiesPage() {
         <TabsContent value={tab} className="mt-4">
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {[...Array(6)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-lg animate-pulse" />)}
+              {[...Array(6)].map((_, i) => <div key={i} className="h-24 bg-muted rounded-lg animate-pulse" />)}
             </div>
           ) : parties.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-gray-400">No parties found</CardContent></Card>
+            <Card className="border-border bg-card"><CardContent className="py-12 text-center text-muted-foreground">No parties found</CardContent></Card>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {parties.map((p: { id: number; name: string; phone: string | null; village: string | null; district: string | null; party_type: string }) => (
-                <Card key={p.id} className="hover:border-amber-300 transition-colors cursor-pointer">
+                <Card key={p.id} className="border-border bg-card hover:border-amber-400 dark:hover:border-amber-600 transition-colors cursor-pointer">
                   <CardContent className="pt-4 pb-3">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="font-semibold text-gray-900 leading-tight">{p.name}</p>
+                      <p className="font-semibold text-foreground leading-tight">{p.name}</p>
                       <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-medium capitalize ${typeColor[p.party_type] || ""}`}>
                         {p.party_type === "supplier" ? "Farmer" : p.party_type === "customer" ? "Buyer" : "Both"}
                       </span>
                     </div>
                     {p.phone && (
-                      <div className="flex items-center gap-1.5 mt-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-1.5 mt-2 text-sm text-muted-foreground">
                         <Phone className="w-3.5 h-3.5" /> {p.phone}
                       </div>
                     )}
                     {(p.village || p.district) && (
-                      <div className="flex items-center gap-1.5 mt-1 text-sm text-gray-400">
+                      <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
                         <MapPin className="w-3.5 h-3.5" />
                         {[p.village, p.district].filter(Boolean).join(", ")}
                       </div>

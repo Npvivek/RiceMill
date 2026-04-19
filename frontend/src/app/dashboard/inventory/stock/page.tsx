@@ -4,7 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { api, fmt } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const MOV_COLORS: Record<string, string> = {
+  milling_out: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
+  sale_out: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+  adjustment: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
+};
 
 export default function StockPage() {
   const { data: stock = [], isLoading: stockLoading } = useQuery({
@@ -17,63 +22,59 @@ export default function StockPage() {
     queryFn: () => api.get("/api/inventory/stock/movements").then((r) => r.data),
   });
 
-  const movColor: Record<string, string> = {
-    milling_out: "bg-green-100 text-green-700",
-    sale_out: "bg-red-100 text-red-700",
-    adjustment: "bg-yellow-100 text-yellow-700",
-  };
-
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-gray-900">Rice Stock</h1>
+      <h1 className="text-2xl font-bold text-foreground">By-product Stock</h1>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {stockLoading
-          ? [...Array(4)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-lg animate-pulse" />)
+          ? [...Array(3)].map((_, i) => <div key={i} className="h-24 bg-muted rounded-lg animate-pulse" />)
           : stock.map((s: { id: number; rice_type: string; grade: string; quantity_qtl: number }) => (
-            <Card key={s.id} className="border-amber-200">
+            <Card key={s.id} className="border-border bg-card hover:border-amber-400 dark:hover:border-amber-600 transition-colors">
               <CardContent className="pt-4 pb-3">
-                <p className="text-xs font-semibold text-amber-700 capitalize">{s.rice_type.replace(/_/g, " ")}</p>
-                <p className="text-xl font-bold text-gray-900 mt-1">{fmt.number(s.quantity_qtl)}</p>
-                <p className="text-xs text-gray-400">quintals</p>
-                <Badge variant="outline" className="text-xs mt-2">Grade {s.grade}</Badge>
+                <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 capitalize">{s.rice_type.replace(/_/g, " ")}</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{fmt.number(s.quantity_qtl)}</p>
+                <p className="text-xs text-muted-foreground">quintals</p>
+                <Badge variant="outline" className="text-xs mt-2 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400">
+                  Grade {s.grade}
+                </Badge>
               </CardContent>
             </Card>
           ))}
       </div>
 
-      <Card>
+      <Card className="border-border bg-card">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Stock Movements (Last 100)</CardTitle>
+          <CardTitle className="text-base text-foreground">Stock Movements</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             {movLoading ? (
-              <div className="p-4 space-y-2">{[...Array(5)].map((_, i) => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
+              <div className="p-4 space-y-2">{[...Array(5)].map((_, i) => <div key={i} className="h-10 bg-muted rounded animate-pulse" />)}</div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-muted/50 border-b border-border">
                   <tr>
                     {["Date", "Type", "Item", "Qty (qtl)", "Reference"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-border">
                   {movements.map((m: {
                     id: number; movement_date: string; movement_type: string;
                     item_type: string; quantity_qtl: number; reference_type: string; reference_id: number;
                   }) => (
-                    <tr key={m.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-gray-600">{fmt.date(m.movement_date)}</td>
+                    <tr key={m.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3 text-muted-foreground">{fmt.date(m.movement_date)}</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${movColor[m.movement_type] || "bg-gray-100 text-gray-600"}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${MOV_COLORS[m.movement_type] ?? "bg-muted text-muted-foreground"}`}>
                           {m.movement_type.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="px-4 py-3 capitalize text-gray-700">{m.item_type.replace(/_/g, " ")}</td>
-                      <td className="px-4 py-3 font-medium">{fmt.number(m.quantity_qtl)}</td>
-                      <td className="px-4 py-3 text-gray-400 text-xs">{m.reference_type} #{m.reference_id}</td>
+                      <td className="px-4 py-3 capitalize text-foreground">{m.item_type.replace(/_/g, " ")}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">{fmt.number(m.quantity_qtl)}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{m.reference_type} #{m.reference_id}</td>
                     </tr>
                   ))}
                 </tbody>
