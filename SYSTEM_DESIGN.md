@@ -8,7 +8,7 @@
 
 ## 1. Business Overview
 
-**Business:** Panduranga Rice Mill — family-run, Hanuman Junction, Krishna District, Andhra Pradesh  
+**Business:** Panduranga Rice Mill — family-run, Hanuman Junction, Eluru District, Andhra Pradesh
 **Owner:** Uses this system for tracking; day-to-day data entry replaces Excel
 
 ### What the mill does

@@ -3,8 +3,8 @@ import { Providers } from "@/lib/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Panduranga Rice Mill",
-  description: "Rice Mill Management — Hanuman Junction, AP",
+  title: "Panduranga Rice Mill | Eluru District",
+  description: "Broken rice, rice bran, rice husk, and paddy procurement in Eluru district, Andhra Pradesh.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

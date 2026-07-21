@@ -33,7 +33,7 @@ export default function ProductsPage() {
       <div className="max-w-3xl mx-auto px-4 py-10">
         <h1 className="text-2xl font-bold text-amber-900 dark:text-amber-100 mb-1">Products & Availability</h1>
         <p className="text-sm text-muted-foreground mb-1">Market rates change daily. Call or WhatsApp for today&apos;s ₹ per quintal price.</p>
-        <p className="text-xs text-muted-foreground mb-8">Minimum order: 10 quintals for delivery</p>
+        <p className="text-xs text-muted-foreground mb-8">Minimum order: 10 quintals · Delivery within Eluru district</p>
 
         <div className="space-y-3 mb-8">
           {Object.entries(riceInfo).map(([key, info]) => (

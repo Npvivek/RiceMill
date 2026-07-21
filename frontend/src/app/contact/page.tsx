@@ -125,7 +125,7 @@ export default function ContactPage() {
                   <p className="text-xs text-muted-foreground">Visit us</p>
                   <p className="font-bold text-foreground">Panduranga Rice Mill</p>
                   <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">
-                    Hanuman Junction,<br />Krishna District, Andhra Pradesh
+                    Hanuman Junction,<br />Eluru District, Andhra Pradesh
                   </p>
                 </div>
               </CardContent>

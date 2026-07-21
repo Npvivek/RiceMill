@@ -1,6 +1,6 @@
 # Panduranga Rice Mill
 
-Marketing website and private, browser-based Excel analysis workspace for a family rice mill in Hanuman Junction, Andhra Pradesh.
+Marketing website and private, browser-based Excel analysis workspace for a family rice mill in Hanuman Junction, Eluru district, Andhra Pradesh.
 
 **Live frontend:** [rice-mill-steel.vercel.app](https://rice-mill-steel.vercel.app/)
 

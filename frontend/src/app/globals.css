@@ -131,3 +131,55 @@
     @apply font-sans;
   }
 }
+
+@layer utilities {
+  .font-mill-display {
+    font-family: "Arial Narrow", "Aptos Display", Impact, Inter, ui-sans-serif, system-ui, sans-serif;
+    font-stretch: condensed;
+  }
+
+  .mill-noise {
+    background-image:
+      radial-gradient(circle at 18% 22%, rgb(245 158 11 / 8%) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 72% 64%, rgb(255 255 255 / 4%) 0 1px, transparent 1.5px);
+    background-size: 31px 31px, 47px 47px;
+  }
+}
+
+@keyframes grain-fall {
+  0% { opacity: 0; translate: 0 -20px; }
+  20%, 70% { opacity: 1; }
+  100% { opacity: 0; translate: 0 112px; }
+}
+
+@keyframes mill-spin {
+  to { rotate: 360deg; }
+}
+
+@keyframes flow-dash {
+  to { stroke-dashoffset: -24; }
+}
+
+.grain-fall {
+  animation: grain-fall 2.6s ease-in infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mill-wheel {
+  animation: mill-spin 14s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.flow-dash {
+  animation: flow-dash 1.2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain-fall,
+  .mill-wheel,
+  .flow-dash {
+    animation: none;
+  }
+}

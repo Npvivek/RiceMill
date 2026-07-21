@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   BarChart3,
   CheckCircle2,
+  Download,
   FileSpreadsheet,
   IndianRupee,
   LoaderCircle,
@@ -20,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { analyzeWorkbook, type WorkbookAnalysis, type WorkbookSheet } from "@/lib/excel-analysis";
+import { downloadAnalysisPdf } from "@/lib/pdf-report";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
@@ -193,8 +195,23 @@ function EmptyAnalyzer({
 }
 
 function AnalysisReport({ analysis, onReset }: { analysis: WorkbookAnalysis; onReset: () => void }) {
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const chartMax = Math.max(1, ...analysis.months.flatMap((month) => [Math.abs(month.income), Math.abs(month.expense)]));
   const categoryMax = Math.max(1, ...analysis.categories.slice(0, 8).map((category) => Math.abs(category.amount)));
+
+  async function handlePdfDownload() {
+    setPdfBusy(true);
+    setPdfError(null);
+    try {
+      await downloadAnalysisPdf(analysis);
+    } catch (reason) {
+      console.error(reason);
+      setPdfError("The PDF could not be created. Please try the download again.");
+    } finally {
+      setPdfBusy(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-5">
@@ -208,14 +225,27 @@ function AnalysisReport({ analysis, onReset }: { analysis: WorkbookAnalysis; onR
             {formatDate(analysis.dateFrom)} – {formatDate(analysis.dateTo)} · {analysis.sheetCount} sheets · {count.format(analysis.sourceRows)} populated rows
           </p>
         </div>
-        <Button variant="outline" onClick={onReset} className="shrink-0 gap-2 self-start">
-          <RefreshCw className="h-4 w-4" /> Analyze another file
-        </Button>
+        <div className="flex shrink-0 flex-wrap gap-2 self-start">
+          <Button onClick={handlePdfDownload} disabled={pdfBusy} className="gap-2 bg-amber-600 text-white hover:bg-amber-700">
+            {pdfBusy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {pdfBusy ? "Preparing PDF..." : "Download PDF"}
+          </Button>
+          <Button variant="outline" onClick={onReset} className="gap-2">
+            <RefreshCw className="h-4 w-4" /> Analyze another file
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200">
-        <ShieldCheck className="h-4 w-4 shrink-0" /> Analysis completed locally in this browser. No workbook data was uploaded.
+        <ShieldCheck className="h-4 w-4 shrink-0" /> Analysis and PDF generation happen locally in this browser. No workbook data is uploaded.
       </div>
+
+      {pdfError && (
+        <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>{pdfError}</p>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Income" value={money.format(analysis.income)} note="Confidently classified receipts" tone="green" icon={ArrowUpRight} />
