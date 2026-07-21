@@ -2,38 +2,34 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
 import { ArrowLeft, Phone, MapPin, CheckCircle, Clock } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { FloatingWhatsApp } from "@/components/ui/whatsapp-button";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
     const fd = new FormData(e.currentTarget);
-    try {
-      await api.post("/api/public/contact", {
-        name: fd.get("name"),
-        phone: fd.get("phone") || null,
-        email: fd.get("email") || null,
-        message: fd.get("message"),
-      });
-      setSent(true);
-    } catch {
-      toast.error("Failed to send message. Please call or WhatsApp us directly.");
-    } finally {
-      setLoading(false);
-    }
+    const name = String(fd.get("name") || "").trim();
+    const phone = String(fd.get("phone") || "").trim();
+    const email = String(fd.get("email") || "").trim();
+    const message = String(fd.get("message") || "").trim();
+    const details = [
+      `Hi, I am ${name}.`,
+      message,
+      phone ? `Phone: ${phone}` : "",
+      email ? `Email: ${email}` : "",
+    ].filter(Boolean).join("\n");
+
+    window.open(`https://wa.me/919703022892?text=${encodeURIComponent(details)}`, "_blank", "noopener,noreferrer");
+    setSent(true);
   }
 
   return (
@@ -145,8 +141,8 @@ export default function ContactPage() {
                     <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                       <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
                     </div>
-                    <p className="font-bold text-foreground text-lg">Message sent!</p>
-                    <p className="text-sm text-muted-foreground mt-1">We&apos;ll get back to you soon.</p>
+                    <p className="font-bold text-foreground text-lg">WhatsApp opened</p>
+                    <p className="text-sm text-muted-foreground mt-1">Send the prepared message there and we&apos;ll get back to you soon.</p>
                     <p className="text-sm text-muted-foreground mt-1">
                       For faster response, WhatsApp us at{" "}
                       <a href="https://wa.me/919703022892" className="text-green-600 dark:text-green-400 font-medium hover:underline">
@@ -181,8 +177,8 @@ export default function ContactPage() {
                           rows={5}
                         />
                       </div>
-                      <Button type="submit" className="w-full bg-amber-600 hover:bg-amber-700" disabled={loading}>
-                        {loading ? "Sending…" : "Send Message"}
+                      <Button type="submit" className="w-full bg-amber-600 hover:bg-amber-700">
+                        Continue on WhatsApp
                       </Button>
                       <p className="text-xs text-center text-muted-foreground">
                         Or reach us instantly on{" "}

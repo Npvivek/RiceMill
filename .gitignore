@@ -19,3 +19,7 @@ frontend/out/
 # OS
 .DS_Store
 Thumbs.db
+
+# Private mill documents and workbooks (keep local only)
+Data/
+license/

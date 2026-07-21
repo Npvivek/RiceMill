@@ -2,6 +2,8 @@
 
 > **Living document.** Update this file in the same commit as any schema migration or core logic change.
 
+> **Status (July 2026): historical backend design.** The Railway backend is no longer deployed. The active Vercel application is the public marketing site plus a browser-only Excel analysis dashboard; see `README.md`. The FastAPI/PostgreSQL material below is retained as a reference until the legacy backend is deliberately archived or removed.
+
 ---
 
 ## 1. Business Overview

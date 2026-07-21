@@ -73,9 +73,9 @@ export default function HomePage() {
             <Link href="/products" className="text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Products</Link>
             <a href="/contact" className="text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Contact</a>
             <ThemeToggle />
-            <Link href="/login">
+            <Link href="/dashboard">
               <Button size="sm" variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 ml-1">
-                Staff Login
+                Mill Dashboard
               </Button>
             </Link>
           </div>
