@@ -1,290 +1,321 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  Award,
-  CheckCircle2,
-  Droplets,
-  Factory,
-  Flame,
-  Landmark,
-  MapPin,
-  MessageCircle,
-  Package,
-  Phone,
-  Receipt,
-  Scale,
-  ShieldCheck,
-  Wheat,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Phone, MapPin, Wheat, ArrowRight, Package, Flame, CheckCircle, Scale, Shield, Droplets, ShieldCheck, Receipt, Landmark, Factory, Award } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { FloatingWhatsApp } from "@/components/ui/whatsapp-button";
-import { BrandMark } from "@/components/marketing/brand-mark";
-import { MillFlowVisual } from "@/components/marketing/mill-flow-visual";
 
 const products = [
   {
-    name: "Broken rice",
+    name: "Broken Rice",
     icon: Package,
-    eyebrow: "Food & feed",
-    description: "Consistent mill-grade broken rice for flour mills, poultry feed, and starch processing.",
-    tone: "border-amber-300/70 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/25 dark:text-amber-100",
-    iconTone: "bg-amber-200/70 text-amber-800 dark:bg-amber-900/70 dark:text-amber-300",
+    desc: "Suitable for flour mills, poultry feed, and starch production. Available in large quantities.",
+    uses: ["Flour mills", "Poultry feed", "Starch production"],
+    badge: "High Demand",
   },
   {
-    name: "Rice bran",
-    icon: Droplets,
-    eyebrow: "Oil & nutrition",
-    description: "Fresh rice bran supplied to extraction units and animal-feed businesses in bulk lots.",
-    tone: "border-orange-300/70 bg-orange-50 text-orange-950 dark:border-orange-900 dark:bg-orange-950/25 dark:text-orange-100",
-    iconTone: "bg-orange-200/70 text-orange-800 dark:bg-orange-900/70 dark:text-orange-300",
-  },
-  {
-    name: "Rice husk",
+    name: "Rice Husk",
     icon: Flame,
-    eyebrow: "Biomass fuel",
-    description: "Dry rice husk for boilers, brick kilns, and other biomass applications.",
-    tone: "border-stone-300 bg-stone-100 text-stone-950 dark:border-stone-700 dark:bg-stone-900/70 dark:text-stone-100",
-    iconTone: "bg-stone-200 text-stone-800 dark:bg-stone-800 dark:text-stone-300",
+    desc: "Clean-burning biomass fuel used in boilers and brick kilns. High calorific value.",
+    uses: ["Boiler fuel", "Brick kilns", "Biomass energy"],
+    badge: "Bulk Available",
   },
-];
-
-const certifications = [
-  { icon: ShieldCheck, label: "FSSAI licensed" },
-  { icon: Receipt, label: "GST registered" },
-  { icon: Scale, label: "Certified weighbridge" },
-  { icon: Landmark, label: "DCSO authorized" },
-  { icon: Factory, label: "Factory licensed" },
-  { icon: Award, label: "Udyam registered" },
+  {
+    name: "Rice Bran",
+    icon: Droplets,
+    desc: "Rich oil-bearing by-product sold to extraction units. Also used as animal feed supplement.",
+    uses: ["Bran oil extraction", "Animal feed", "Nutraceuticals"],
+    badge: "By-Product",
+  },
 ];
 
 const paddyBenefits = [
-  "Today’s procurement rate confirmed before delivery",
-  "Licensed weighbridge with transparent weighing",
-  "Moisture checked in front of the supplier",
-  "Prompt payment after quality and weight confirmation",
-  "BPT, MTU, Rajanna, and other local varieties",
-  "Direct relationship with the mill team",
+  "Rates competitive with or above govt MSP",
+  "Same-day or next-day payment",
+  "No long queues or paperwork hassle",
+  "Licensed WeighBridge — certified fair weighing",
+  "Fair moisture testing on every batch",
+  "All varieties accepted — BPT, MTU, Rajanna",
+];
+
+const certifications = [
+  { icon: ShieldCheck, label: "FSSAI Licensed", sub: "Food Safety & Standards Authority of India", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/30" },
+  { icon: Receipt, label: "GST Registered", sub: "Goods & Services Tax — Compliant Business", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-900/30" },
+  { icon: Scale, label: "WeighBridge Certified", sub: "Officially Licensed Weighbridge — Fair & Recorded", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/30" },
+  { icon: Landmark, label: "DCSO Authorized", sub: "District Civil Supplies Office — Govt Milling Approved", color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/30" },
+  { icon: Factory, label: "Factory Licensed", sub: "Registered Manufacturing Unit under Factories Act", color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-900/30" },
+  { icon: Award, label: "Udyam Registered", sub: "MSME — Ministry of MSME, Govt of India", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/30" },
+];
+
+const trustPoints = [
+  { icon: Wheat, title: "Modern Milling", desc: "High-efficiency machinery for quality output and minimal waste" },
+  { icon: Scale, title: "Fair Dealing", desc: "Transparent weighing and moisture testing — always done openly" },
+  { icon: Shield, title: "Family Business", desc: "Decades of trust in Hanuman Junction — your neighbors, not strangers" },
+  { icon: CheckCircle, title: "Reliable Supply", desc: "Consistent stock of broken rice, husk, and bran year-round" },
 ];
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#fbfaf6] text-stone-950 dark:bg-[#0c0d0b] dark:text-stone-100">
-      <nav className="sticky top-0 z-50 border-b border-amber-950/10 bg-[#fbfaf6]/90 px-4 py-3 backdrop-blur-xl dark:border-amber-100/10 dark:bg-[#0c0d0b]/90">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3" aria-label="Panduranga Rice Mill home">
-            <BrandMark className="h-9 w-9 text-amber-600 transition-transform duration-300 group-hover:-rotate-3 dark:text-amber-400" />
-            <div>
-              <p className="font-mill-display text-sm font-black uppercase leading-none tracking-[0.08em] text-stone-900 dark:text-amber-100">Panduranga Rice Mill</p>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">Hanuman Junction · Eluru</p>
-            </div>
-          </Link>
+    <div className="min-h-screen bg-background text-foreground">
 
+      {/* Nav */}
+      <nav className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">🌾</span>
+            <div>
+              <p className="font-bold text-sm leading-tight text-amber-800 dark:text-amber-300">Panduranga Rice Mill</p>
+              <p className="text-xs text-muted-foreground">Hanuman Junction, Eluru</p>
+            </div>
+          </div>
           <div className="flex items-center gap-1 sm:gap-2">
-            <Link href="#products" className="hidden px-3 py-2 text-sm font-medium text-stone-600 transition-colors hover:text-amber-700 md:block dark:text-stone-300 dark:hover:text-amber-300">Products</Link>
-            <Link href="#paddy" className="hidden px-3 py-2 text-sm font-medium text-stone-600 transition-colors hover:text-amber-700 md:block dark:text-stone-300 dark:hover:text-amber-300">Sell paddy</Link>
-            <Link href="/contact" className="hidden px-3 py-2 text-sm font-medium text-stone-600 transition-colors hover:text-amber-700 sm:block dark:text-stone-300 dark:hover:text-amber-300">Contact</Link>
+            <Link href="/products" className="text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Products</Link>
+            <a href="/contact" className="text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Contact</a>
             <ThemeToggle />
             <Link href="/dashboard">
-              <Button size="sm" variant="outline" className="ml-1 border-amber-500/50 bg-transparent text-amber-800 hover:bg-amber-100 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/60">
-                Mill dashboard
+              <Button size="sm" variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 ml-1">
+                Mill Dashboard
               </Button>
             </Link>
           </div>
         </div>
       </nav>
 
-      <main>
-        <section className="mill-noise relative overflow-hidden bg-[#13130f] px-4 py-14 text-stone-100 md:py-20 lg:py-24">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
-          <div className="absolute -left-40 top-20 h-80 w-80 rounded-full bg-emerald-900/20 blur-3xl" />
-          <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
-
-          <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.03fr_.97fr] lg:gap-8">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 border-l-2 border-amber-400 bg-amber-400/8 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300">
-                <MapPin className="h-3.5 w-3.5" /> Hanuman Junction · Eluru district
-              </div>
-
-              <h1 className="font-mill-display mt-7 text-5xl font-black uppercase leading-[.92] tracking-[-0.035em] text-[#fff7df] sm:text-6xl lg:text-[4.8rem]">
-                Paddy in.
-                <span className="mt-2 block text-amber-400">Value out.</span>
-              </h1>
-              <p className="mt-6 max-w-xl text-base leading-7 text-stone-300 sm:text-lg">
-                Wholesale broken rice, bran, and husk—milled locally and supplied across Eluru district. We also procure paddy directly from farmers and traders within the district.
-              </p>
-
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="#products">
-                  <Button size="lg" className="w-full gap-2 bg-amber-500 font-bold text-stone-950 shadow-[0_12px_40px_rgba(245,158,11,.18)] hover:bg-amber-400 sm:w-auto">
-                    Explore our products <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <a href="https://wa.me/919703022892?text=Hi,%20I%20want%20to%20sell%20paddy%20to%20Panduranga%20Rice%20Mill" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="outline" className="w-full gap-2 border-stone-600 bg-transparent text-stone-100 hover:border-emerald-500 hover:bg-emerald-950/40 sm:w-auto">
-                    <Wheat className="h-4 w-4" /> Sell paddy to us
-                  </Button>
-                </a>
-              </div>
-
-              <div className="mt-10 grid max-w-xl grid-cols-3 border-y border-stone-700/70 py-4">
-                <div>
-                  <p className="font-mill-display text-2xl font-black text-amber-300">30+</p>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">Years local</p>
-                </div>
-                <div className="border-x border-stone-700/70 px-5">
-                  <p className="font-mill-display text-2xl font-black text-amber-300">3</p>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">By-products</p>
-                </div>
-                <div className="pl-5">
-                  <p className="font-mill-display text-2xl font-black text-amber-300">Eluru</p>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">Service district</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative lg:pl-4">
-              <MillFlowVisual />
-            </div>
+      {/* Hero */}
+      <section className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/40 dark:via-orange-950/20 dark:to-amber-900/20 px-4 py-16 md:py-24 overflow-hidden">
+        <div className="absolute inset-0 dark:opacity-5 opacity-[0.03]"
+          style={{ backgroundImage: "radial-gradient(circle at 20% 50%, #b45309 0%, transparent 50%), radial-gradient(circle at 80% 20%, #92400e 0%, transparent 40%)" }}
+        />
+        <div className="max-w-5xl mx-auto text-center relative">
+          <Badge className="bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700 mb-5">
+            Est. in Hanuman Junction, AP
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold text-amber-900 dark:text-amber-100 leading-tight tracking-tight">
+            Quality Mill By-Products.<br />
+            <span className="text-amber-600 dark:text-amber-400">Fair Paddy Rates.</span>
+          </h1>
+          <p className="mt-5 text-base md:text-lg text-amber-800/80 dark:text-amber-300/90 max-w-lg mx-auto leading-relaxed">
+            We sell broken rice, husk, and bran at wholesale rates — and we&apos;re actively procuring paddy from farmers and traders within Eluru district.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <Link href="/products">
+              <Button size="lg" className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600 w-full sm:w-auto gap-2">
+                View Products & Prices <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <a href="#sell-paddy">
+              <Button size="lg" variant="outline" className="border-amber-400 dark:border-amber-600 text-amber-800 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/60 w-full sm:w-auto">
+                🌾 Sell Paddy to Us
+              </Button>
+            </a>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="border-b border-amber-950/10 bg-amber-400 px-4 py-4 text-stone-950 dark:border-amber-300/10 dark:bg-amber-500">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-xs font-black uppercase tracking-[0.15em] sm:gap-x-7">
-            <span>Paddy received</span><ArrowRight className="h-3.5 w-3.5" />
-            <span>Weighed & tested</span><ArrowRight className="h-3.5 w-3.5" />
-            <span>Milled efficiently</span><ArrowRight className="h-3.5 w-3.5" />
-            <span>Products supplied</span>
-          </div>
-        </section>
-
-        <section id="products" className="scroll-mt-20 px-4 py-16 md:py-24">
-          <div className="mx-auto max-w-6xl">
-            <div className="grid items-end gap-5 md:grid-cols-[1fr_auto]">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400">Mill output · bulk supply</p>
-                <h2 className="font-mill-display mt-3 max-w-2xl text-4xl font-black uppercase leading-none tracking-[-0.025em] text-stone-900 sm:text-5xl dark:text-stone-100">Three useful products. Zero wasted potential.</h2>
-              </div>
-              <Link href="/products" className="inline-flex items-center gap-2 text-sm font-bold text-amber-800 hover:text-amber-600 dark:text-amber-300 dark:hover:text-amber-200">
-                Availability & pricing <ArrowRight className="h-4 w-4" />
-              </Link>
+      {/* Stats bar */}
+      <section className="border-b border-border bg-muted/20 px-4 py-5">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          {[
+            { val: "30+", label: "Years in Business" },
+            { val: "3", label: "Products We Sell" },
+            { val: "Eluru", label: "District Served" },
+            { val: "Direct", label: "From the Mill" },
+          ].map((s) => (
+            <div key={s.label}>
+              <p className="text-xl md:text-2xl font-bold text-amber-700 dark:text-amber-400">{s.val}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
-              {products.map((product, index) => (
-                <article key={product.name} className={`group relative overflow-hidden rounded-2xl border p-6 transition-transform duration-300 hover:-translate-y-1 ${product.tone}`}>
-                  <span className="absolute right-5 top-4 font-mill-display text-5xl font-black text-current opacity-[.06]">0{index + 1}</span>
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${product.iconTone}`}>
-                    <product.icon className="h-6 w-6" />
+      {/* Certifications */}
+      <section className="bg-muted/30 border-y border-border px-4 py-14">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              <CheckCircle className="w-3.5 h-3.5" /> Licensed & Registered
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">Licensed. Verified. Trusted.</h2>
+            <p className="text-muted-foreground text-sm mt-2 max-w-md mx-auto">
+              Panduranga Rice Mill holds government licences and registrations — so you know you&apos;re dealing with a compliant, accountable business.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {certifications.map((c) => (
+              <div key={c.label} className="flex items-start gap-4 bg-background rounded-2xl border border-border p-5 hover:border-amber-400 dark:hover:border-amber-600 hover:shadow-md transition-all">
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${c.bg}`}>
+                  <c.icon className={`w-5 h-5 ${c.color}`} />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <p className="font-semibold text-foreground text-sm">{c.label}</p>
+                    <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
                   </div>
-                  <p className="mt-8 text-[10px] font-black uppercase tracking-[0.2em] opacity-55">{product.eyebrow}</p>
-                  <h3 className="font-mill-display mt-2 text-2xl font-black uppercase tracking-tight">{product.name}</h3>
-                  <p className="mt-3 text-sm leading-6 opacity-70">{product.description}</p>
-                  <a href="https://wa.me/919703022892?text=Hi,%20I%20need%20today's%20price%20and%20availability" target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] underline decoration-current/30 underline-offset-4">
-                    Ask today&apos;s rate <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="paddy" className="scroll-mt-20 px-4 pb-16 md:pb-24">
-          <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[2rem] bg-[#173b29] text-white shadow-[0_30px_80px_rgba(20,50,34,.18)] lg:grid-cols-[.92fr_1.08fr]">
-            <div className="relative overflow-hidden border-b border-white/10 p-8 sm:p-12 lg:border-b-0 lg:border-r">
-              <div className="absolute -bottom-28 -left-20 h-72 w-72 rounded-full border-[40px] border-emerald-300/5" />
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-300">For Eluru district farmers & traders</p>
-              <h2 className="font-mill-display mt-4 text-4xl font-black uppercase leading-[.98] tracking-[-0.02em] sm:text-5xl">Sell paddy directly to the mill.</h2>
-              <p className="mt-5 max-w-lg text-sm leading-6 text-emerald-50/70">
-                Call before dispatch to confirm today&apos;s rate, accepted variety, moisture expectations, and delivery time. Clear terms before the load moves.
-              </p>
-              <a href="https://wa.me/919703022892?text=Hi,%20I%20have%20paddy%20to%20sell%20within%20Eluru%20district" target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex">
-                <Button size="lg" className="gap-2 bg-white font-bold text-emerald-950 hover:bg-emerald-50">
-                  <MessageCircle className="h-4 w-4" /> Check today&apos;s paddy rate
-                </Button>
-              </a>
-            </div>
-
-            <div className="grid gap-px bg-white/10 sm:grid-cols-2">
-              {paddyBenefits.map((benefit) => (
-                <div key={benefit} className="flex min-h-28 items-start gap-3 bg-[#173b29] p-6">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
-                  <p className="text-sm font-medium leading-6 text-emerald-50/85">{benefit}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{c.sub}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="border-y border-stone-200 bg-white px-4 py-16 dark:border-stone-800 dark:bg-stone-950">
-          <div className="mx-auto max-w-6xl">
-            <div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr] lg:items-center">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">Licensed & registered</p>
-                <h2 className="font-mill-display mt-3 text-3xl font-black uppercase leading-none text-stone-900 dark:text-stone-100">A mill you can verify.</h2>
-                <p className="mt-4 text-sm leading-6 text-stone-600 dark:text-stone-400">Government registrations and certified weighing support transparent business with suppliers and buyers.</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {certifications.map((certification) => (
-                  <div key={certification.label} className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-900">
-                    <certification.icon className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
-                    <p className="text-xs font-bold leading-4 text-stone-700 dark:text-stone-200">{certification.label}</p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Products We Sell */}
+      <section className="px-4 py-14 max-w-5xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-amber-900 dark:text-amber-100">What We Sell</h2>
+          <p className="text-muted-foreground text-sm mt-2">Mill by-products available at wholesale rates. Minimum order quantities apply.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {products.map((p) => (
+            <Card key={p.name} className="border-border hover:border-amber-400 dark:hover:border-amber-600 transition-all hover:shadow-lg group bg-card">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-200 dark:group-hover:bg-amber-900/60 transition-colors">
+                  <p.icon className="w-6 h-6 text-amber-700 dark:text-amber-400" />
+                </div>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h3 className="font-bold text-foreground">{p.name}</h3>
+                  <Badge variant="secondary" className="text-xs shrink-0 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-0">
+                    {p.badge}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{p.desc}</p>
+                <div className="space-y-1.5">
+                  {p.uses.map((u) => (
+                    <div key={u} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
+                      {u}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="text-center mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/products">
+            <Button className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600">
+              See Current Prices
+            </Button>
+          </Link>
+          <a href="https://wa.me/919703022892?text=Hi,%20I%20need%20pricing%20for%20mill%20by-products" target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" className="border-green-500 dark:border-green-700 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/40">
+              💬 WhatsApp for Bulk Quote
+            </Button>
+          </a>
+        </div>
+      </section>
+
+      {/* Sell Paddy to Us */}
+      <section id="sell-paddy" className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/20 px-4 py-14 border-y border-border">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <Badge className="bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 border-green-300 dark:border-green-700 mb-4">
+                For Paddy Farmers & Traders
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 leading-tight">
+                Sell Your Paddy<br />
+                <span className="text-green-700 dark:text-green-400">Directly to the Mill</span>
+              </h2>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                We are actively procuring paddy from farmers and traders within Eluru district. Get fair rates, clear terms, and a direct relationship with the mill.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-8">
+                {paddyBenefits.map((b) => (
+                  <div key={b} className="flex items-start gap-2 text-sm text-foreground/80">
+                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                    {b}
                   </div>
                 ))}
               </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a href="https://wa.me/919703022892?text=Hi,%20I%20want%20to%20sell%20paddy%20to%20your%20mill" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 w-full sm:w-auto">
+                    💬 WhatsApp to Sell Paddy
+                  </Button>
+                </a>
+                <Link href="/contact">
+                  <Button size="lg" variant="outline" className="border-green-400 dark:border-green-700 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/40 w-full sm:w-auto">
+                    Send Enquiry
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
 
-        <section className="px-4 py-16 md:py-24">
-          <div className="mx-auto max-w-6xl">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4">
               {[
-                { value: "Open", label: "weighing", text: "Weight and moisture are checked transparently before acceptance." },
-                { value: "Local", label: "service", text: "Focused on Eluru district for dependable pickup, delivery, and support." },
-                { value: "Direct", label: "contact", text: "Speak with the mill team—not a marketplace or anonymous middleman." },
-              ].map((point) => (
-                <div key={point.value} className="border-t-2 border-amber-500 pt-5">
-                  <p className="font-mill-display text-3xl font-black uppercase text-stone-900 dark:text-stone-100">{point.value} <span className="text-amber-600 dark:text-amber-400">{point.label}</span></p>
-                  <p className="mt-3 max-w-sm text-sm leading-6 text-stone-600 dark:text-stone-400">{point.text}</p>
+                { title: "Fair Pricing", desc: "Ask us for today's procurement rate before dispatch.", icon: "💰" },
+                { title: "Quick Payment", desc: "Payment terms are confirmed clearly with the mill.", icon: "⚡" },
+                { title: "Local Varieties", desc: "BPT, MTU, Rajanna, and other local varieties.", icon: "🌾" },
+                { title: "Certified WeighBridge", desc: "Licensed & official — your weight is recorded accurately.", icon: "⚖️" },
+              ].map((item) => (
+                <div key={item.title} className="bg-background border border-border rounded-xl p-4 hover:border-green-400 dark:hover:border-green-700 transition-colors">
+                  <div className="text-2xl mb-2">{item.icon}</div>
+                  <p className="font-semibold text-sm text-foreground mb-1">{item.title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="px-4 pb-8">
-          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-7 rounded-[2rem] bg-amber-400 p-8 text-stone-950 sm:p-10 md:flex-row md:items-center">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] opacity-60">Bulk order or paddy enquiry?</p>
-              <h2 className="font-mill-display mt-2 text-3xl font-black uppercase leading-none sm:text-4xl">Talk directly to the mill.</h2>
-              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-                <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Hanuman Junction, Eluru district</span>
-                <a href="tel:+919703022892" className="flex items-center gap-2 hover:underline"><Phone className="h-4 w-4" /> +91 97030 22892</a>
+      {/* Trust section */}
+      <section className="px-4 py-14 max-w-5xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl font-bold text-amber-900 dark:text-amber-100">Why Choose Us</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {trustPoints.map((f) => (
+            <div key={f.title} className="text-center p-3">
+              <div className="w-11 h-11 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center mx-auto mb-3">
+                <f.icon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
+              <p className="font-semibold text-foreground text-sm">{f.title}</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{f.desc}</p>
             </div>
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-              <Link href="/contact"><Button size="lg" variant="outline" className="w-full border-stone-950/30 bg-transparent font-bold text-stone-950 hover:bg-amber-300 sm:w-auto">Send enquiry</Button></Link>
-              <a href="https://wa.me/919703022892" target="_blank" rel="noopener noreferrer"><Button size="lg" className="w-full gap-2 bg-emerald-800 font-bold text-white hover:bg-emerald-900 sm:w-auto"><MessageCircle className="h-4 w-4" /> WhatsApp</Button></a>
-            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact strip */}
+      <section className="bg-amber-900 dark:bg-amber-950/80 border-t border-amber-800 dark:border-amber-900 px-4 py-12 text-center">
+        <h2 className="text-xl font-bold text-white mb-2">Get in Touch</h2>
+        <p className="text-amber-200/80 text-sm mb-6">For bulk orders, pricing enquiries, or to sell paddy</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6 text-amber-200">
+          <div className="flex items-center gap-2 text-sm">
+            <Phone className="w-4 h-4 text-amber-400" />
+            <span>+91 97030 22892</span>
           </div>
-        </section>
-      </main>
+          <div className="hidden sm:block text-amber-700">|</div>
+          <div className="flex items-center gap-2 text-sm">
+            <MapPin className="w-4 h-4 text-amber-400" />
+            <span>Hanuman Junction, Eluru District, AP</span>
+          </div>
+        </div>
+        <div className="flex gap-3 justify-center">
+          <Link href="/contact">
+            <Button variant="outline" className="border-amber-500 text-amber-100 bg-transparent hover:bg-amber-800 dark:hover:bg-amber-900/60">
+              Contact Form
+            </Button>
+          </Link>
+          <a href="https://wa.me/919703022892" target="_blank" rel="noopener noreferrer">
+            <Button className="bg-green-600 hover:bg-green-700">💬 WhatsApp</Button>
+          </a>
+        </div>
+      </section>
 
       <FloatingWhatsApp />
 
-      <footer className="border-t border-stone-200 px-4 py-8 dark:border-stone-800">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-          <div className="flex items-center gap-3">
-            <BrandMark className="h-8 w-8 text-amber-600 dark:text-amber-400" />
-            <div>
-              <p className="font-mill-display text-sm font-black uppercase tracking-wide">Panduranga Rice Mill</p>
-              <p className="text-xs text-stone-500">Hanuman Junction, Eluru district, Andhra Pradesh</p>
-            </div>
-          </div>
-          <p className="text-xs text-stone-500">© {new Date().getFullYear()} Panduranga Rice Mill</p>
-        </div>
+      {/* Footer */}
+      <footer className="bg-amber-950 dark:bg-black/80 text-amber-400 px-4 py-6 text-center text-sm">
+        <p className="font-semibold text-white">Panduranga Rice Mill</p>
+        <p className="mt-1 text-amber-500">Hanuman Junction, Eluru District, Andhra Pradesh</p>
+        <p className="mt-2 text-amber-700 text-xs">© {new Date().getFullYear()} All rights reserved</p>
       </footer>
+
     </div>
   );
 }
