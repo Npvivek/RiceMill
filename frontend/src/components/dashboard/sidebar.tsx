@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, ExternalLink, Menu, ShieldCheck } from "lucide-react";
+import { BarChart3, Clock3, ExternalLink, LogOut, Menu, ShieldCheck } from "lucide-react";
+import { logoutAction } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useState } from "react";
 
-function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+function NavContent({ email, onNavigate }: { email: string; onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col bg-white dark:bg-gray-900">
       <div className="border-b border-amber-200 px-4 py-5 dark:border-amber-900/50">
@@ -29,6 +30,14 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           Excel analysis
         </Link>
         <Link
+          href="/dashboard#reports"
+          onClick={onNavigate}
+          className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-gray-600 transition-colors hover:bg-amber-50 hover:text-amber-900 dark:text-gray-400 dark:hover:bg-amber-900/20 dark:hover:text-amber-300"
+        >
+          <Clock3 className="h-4 w-4" />
+          Saved reports
+        </Link>
+        <Link
           href="/"
           onClick={onNavigate}
           className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-gray-600 transition-colors hover:bg-amber-50 hover:text-amber-900 dark:text-gray-400 dark:hover:bg-amber-900/20 dark:hover:text-amber-300"
@@ -41,22 +50,30 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t border-amber-200 px-4 py-4 dark:border-amber-900/50">
         <div className="flex items-start gap-2 text-xs leading-5 text-gray-500 dark:text-gray-400">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          Excel files stay on this device.
+          Excel files stay on this device. Reports are private to this account.
+        </div>
+        <div className="mt-4 border-t border-amber-100 pt-4 dark:border-amber-900/40">
+          <p className="truncate text-[11px] text-gray-500 dark:text-gray-400" title={email}>{email}</p>
+          <form action={logoutAction} className="mt-2">
+            <Button type="submit" variant="ghost" size="sm" className="h-8 w-full justify-start gap-2 px-2 text-gray-600 hover:text-rose-700 dark:text-gray-400 dark:hover:text-rose-300">
+              <LogOut className="h-3.5 w-3.5" /> Sign out
+            </Button>
+          </form>
         </div>
       </div>
     </div>
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ email }: { email: string }) {
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-amber-200 lg:flex dark:border-amber-900/50">
-      <NavContent />
+      <NavContent email={email} />
     </aside>
   );
 }
 
-export function MobileSidebar() {
+export function MobileSidebar({ email }: { email: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -66,7 +83,7 @@ export function MobileSidebar() {
       </Button>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-60 bg-white p-0 dark:bg-gray-900">
-          <NavContent onNavigate={() => setOpen(false)} />
+          <NavContent email={email} onNavigate={() => setOpen(false)} />
         </SheetContent>
       </Sheet>
     </>
