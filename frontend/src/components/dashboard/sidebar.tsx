@@ -1,13 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { BarChart3, Clock3, ExternalLink, LogOut, Menu, ShieldCheck } from "lucide-react";
 import { logoutAction } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { useState } from "react";
 
 function NavContent({ email, onNavigate }: { email: string; onNavigate?: () => void }) {
+  const pathname = usePathname();
+  const analyzerActive = pathname === "/dashboard";
+  const reportsActive = pathname.startsWith("/dashboard/reports");
+  const navItem = (active: boolean) =>
+    `flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+      active
+        ? "bg-amber-100 font-semibold text-amber-950 dark:bg-amber-900/40 dark:text-amber-200"
+        : "text-gray-600 hover:bg-amber-50 hover:text-amber-900 dark:text-gray-400 dark:hover:bg-amber-900/20 dark:hover:text-amber-300"
+    }`;
+
   return (
     <div className="flex h-full flex-col bg-white dark:bg-gray-900">
       <div className="border-b border-amber-200 px-4 py-5 dark:border-amber-900/50">
@@ -24,15 +35,17 @@ function NavContent({ email, onNavigate }: { email: string; onNavigate?: () => v
         <Link
           href="/dashboard"
           onClick={onNavigate}
-          className="flex items-center gap-2.5 rounded-lg bg-amber-100 px-3 py-2.5 text-sm font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200"
+          aria-current={analyzerActive ? "page" : undefined}
+          className={navItem(analyzerActive)}
         >
           <BarChart3 className="h-4 w-4" />
           Excel analysis
         </Link>
         <Link
-          href="/dashboard#reports"
+          href="/dashboard/reports"
           onClick={onNavigate}
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-gray-600 transition-colors hover:bg-amber-50 hover:text-amber-900 dark:text-gray-400 dark:hover:bg-amber-900/20 dark:hover:text-amber-300"
+          aria-current={reportsActive ? "page" : undefined}
+          className={navItem(reportsActive)}
         >
           <Clock3 className="h-4 w-4" />
           Saved reports
