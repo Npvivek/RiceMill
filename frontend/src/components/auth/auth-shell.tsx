@@ -1,35 +1,29 @@
 import Link from "next/link";
-import { ShieldCheck, Wheat } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-amber-50 px-4 py-12 dark:bg-[#100b08]">
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-amber-200/50 to-transparent dark:from-amber-950/40" />
-      <div className="absolute -left-20 bottom-16 h-64 w-64 rounded-full bg-amber-300/20 blur-3xl dark:bg-amber-900/10" />
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f3eb] px-5 py-12 dark:bg-[#100c09]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(217,119,6,0.09),transparent_38%)] dark:bg-[radial-gradient(circle_at_50%_0%,rgba(217,119,6,0.08),transparent_42%)]" />
 
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
 
-      <div className="relative w-full max-w-md">
-        <Link href="/" className="mb-6 flex items-center justify-center gap-3" aria-label="Panduranga Rice Mill home">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
-            <Wheat className="h-6 w-6" />
+      <div className="relative w-full max-w-sm">
+        <Link href="/" className="mb-8 block text-center" aria-label="Panduranga Rice Mill home">
+          <span className="block text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-700/70 dark:text-amber-400/70">
+            Panduranga
           </span>
-          <span>
-            <span className="block text-sm font-bold text-amber-950 dark:text-amber-100">Panduranga Rice Mill</span>
-            <span className="block text-xs text-amber-700/70 dark:text-amber-400/70">Private mill workspace</span>
+          <span className="mt-1 block text-base font-semibold tracking-tight text-stone-950 dark:text-stone-100">
+            Rice Mill
           </span>
         </Link>
 
-        <section className="rounded-3xl border border-amber-200 bg-white p-6 shadow-[0_24px_80px_rgba(120,53,15,0.12)] sm:p-8 dark:border-amber-900/70 dark:bg-gray-950 dark:shadow-black/30">
+        <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white p-7 shadow-[0_28px_80px_rgba(73,45,21,0.10)] sm:p-9 dark:border-stone-800 dark:bg-[#17120e] dark:shadow-black/30">
+          <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/80 to-transparent" />
           {children}
         </section>
-
-        <p className="mt-5 flex items-center justify-center gap-2 text-center text-xs text-amber-800/60 dark:text-amber-300/50">
-          <ShieldCheck className="h-3.5 w-3.5" /> Protected with Supabase authentication
-        </p>
       </div>
     </main>
   );
