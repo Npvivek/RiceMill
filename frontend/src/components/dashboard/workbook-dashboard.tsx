@@ -5,19 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
-  ArrowDownRight,
-  ArrowUpRight,
   CheckCircle2,
+  ChevronDown,
   Clock3,
   Database,
   Download,
   Eye,
   FileSpreadsheet,
   HardDriveDownload,
-  IndianRupee,
   LoaderCircle,
   RefreshCw,
-  ShieldCheck,
   Trash2,
   UploadCloud,
 } from "lucide-react";
@@ -69,40 +66,51 @@ function kindLabel(kind: string): string {
   return "Mixed";
 }
 
-function MetricCard({
-  label,
-  value,
-  note,
-  tone,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  note: string;
-  tone: "green" | "red" | "amber" | "slate";
-  icon: typeof IndianRupee;
-}) {
-  const styles = {
-    green: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
-    red: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300",
-    amber: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
-    slate: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200",
-  };
+function LedgerMetric({ label, value, note, tone = "default" }: { label: string; value: string; note: string; tone?: "green" | "red" | "default" }) {
+  const valueColor = tone === "green" ? "text-emerald-700 dark:text-emerald-400" : tone === "red" ? "text-rose-700 dark:text-rose-400" : "text-foreground";
 
   return (
-    <Card className="border-border bg-card shadow-sm">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-            <p className="mt-2 truncate text-2xl font-bold tracking-tight text-foreground">{value}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{note}</p>
-          </div>
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${styles[tone]}`}>
-            <Icon className="h-5 w-5" />
-          </div>
-        </div>
-      </CardContent>
+    <div className="min-w-0 px-5 py-5 lg:px-6">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+      <p className={`mt-2 truncate text-2xl font-bold tracking-[-0.03em] tabular-nums ${valueColor}`}>{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{note}</p>
+    </div>
+  );
+}
+
+function ReportDisclosure({
+  title,
+  description,
+  countLabel,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  description: string;
+  countLabel?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <Card className="overflow-hidden border-border bg-card shadow-sm">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset"
+      >
+        <span className="min-w-0">
+          <span className="block text-sm font-semibold text-foreground">{title}</span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-2">
+          {countLabel && <span className="text-[11px] font-medium text-muted-foreground">{countLabel}</span>}
+          <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        </span>
+      </button>
+      {open && <div className="border-t border-border">{children}</div>}
     </Card>
   );
 }
@@ -318,8 +326,38 @@ function AnalysisReport({
 }) {
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [showAllNotes, setShowAllNotes] = useState(false);
   const chartMax = Math.max(1, ...analysis.months.flatMap((month) => [Math.abs(month.income), Math.abs(month.expense)]));
   const categoryMax = Math.max(1, ...analysis.categories.slice(0, 8).map((category) => Math.abs(category.amount)));
+  const activeMonths = analysis.months.length;
+  const displayedIncome = analysis.months.reduce((total, month) => total + month.income, 0);
+  const displayedExpenses = analysis.months.reduce((total, month) => total + month.expense, 0);
+  const averageIncome = activeMonths ? displayedIncome / activeMonths : 0;
+  const averageExpenses = activeMonths ? displayedExpenses / activeMonths : 0;
+  const expenseRatio = analysis.income > 0 ? analysis.expenses / analysis.income * 100 : 0;
+  const rowCoverage = analysis.sourceRows > 0 ? Math.min(100, analysis.transactionCount / analysis.sourceRows * 100) : 0;
+  const includedSheets = analysis.sheets.filter((sheet) => sheet.includedInCashFlow).length;
+  const reviewSheets = analysis.sheetCount - includedSheets;
+  const missingDates = analysis.sheets.reduce((total, sheet) => total + sheet.missingDateRows, 0);
+  const missingAmounts = analysis.sheets.reduce((total, sheet) => total + sheet.missingAmountRows, 0);
+  const topIncomeCategory = analysis.categories.find((category) => category.kind === "income");
+  const topExpenseCategory = analysis.categories.find((category) => category.kind === "expense");
+  const highestIncomeMonth = activeMonths
+    ? analysis.months.reduce((highest, month) => month.income > highest.income ? month : highest)
+    : null;
+  const highestExpenseMonth = activeMonths
+    ? analysis.months.reduce((highest, month) => month.expense > highest.expense ? month : highest)
+    : null;
+  const dateSpanYears = analysis.dateFrom && analysis.dateTo
+    ? (analysis.dateTo.getTime() - analysis.dateFrom.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+    : 0;
+  const dateRangeNeedsReview = dateSpanYears > 10 || analysis.warnings.some((warning) => /date typo|date outlier/i.test(warning));
+  const confidence = analysis.warnings.length === 0 && !dateRangeNeedsReview
+    ? "High"
+    : analysis.warnings.length <= 5 && !dateRangeNeedsReview
+      ? "Moderate"
+      : "Needs review";
+  const visibleNotes = showAllNotes ? analysis.warnings : analysis.warnings.slice(0, 4);
 
   async function handlePdfDownload() {
     setPdfBusy(true);
@@ -335,16 +373,31 @@ function AnalysisReport({
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5">
+    <div className="mx-auto max-w-7xl space-y-5 pb-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-400">
             <FileSpreadsheet className="h-4 w-4" /> Workbook report
           </div>
           <h1 className="mt-2 truncate text-2xl font-bold tracking-tight text-foreground md:text-3xl">{analysis.fileName}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {formatDate(analysis.dateFrom)} – {formatDate(analysis.dateTo)} · {analysis.sheetCount} sheets · {count.format(analysis.sourceRows)} populated rows
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+            <span>{formatDate(analysis.dateFrom)} – {formatDate(analysis.dateTo)}</span>
+            <span aria-hidden="true">·</span>
+            <span>{analysis.sheetCount} sheets</span>
+            <span aria-hidden="true">·</span>
+            <span>{count.format(analysis.sourceRows)} populated rows</span>
+            <span
+              aria-live="polite"
+              className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                saveState === "error"
+                  ? "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300"
+                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
+              }`}
+            >
+              {saveState === "saving" && <LoaderCircle className="h-3 w-3 animate-spin" />}
+              {saveState === "saving" ? "Saving" : saveState === "error" ? "Not saved" : saveState === "saved" ? "Saved" : "Ready"}
+            </span>
+          </div>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2 self-start">
           <Button onClick={handlePdfDownload} disabled={pdfBusy} className="gap-2 bg-amber-600 text-white hover:bg-amber-700">
@@ -358,13 +411,12 @@ function AnalysisReport({
         </div>
       </div>
 
-      <div className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-xs ${saveState === "error" ? "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200" : "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200"}`}>
-        {saveState === "saving" ? <LoaderCircle className="h-4 w-4 shrink-0 animate-spin" /> : saveState === "error" ? <AlertTriangle className="h-4 w-4 shrink-0" /> : <ShieldCheck className="h-4 w-4 shrink-0" />}
-        {saveState === "saving" && "The workbook stayed on this device. Saving its analysis privately…"}
-        {saveState === "saved" && "The workbook stayed on this device. This analysis is saved in your private report history."}
-        {saveState === "error" && "The analysis is ready, but it could not be saved. Download the PDF before leaving this page."}
-        {saveState === null && "Analysis and PDF generation happen locally in this browser. No workbook file is uploaded."}
-      </div>
+      {saveState === "error" && (
+        <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>The report is ready but was not saved. Download the PDF before leaving this page.</p>
+        </div>
+      )}
 
       {pdfError && (
         <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
@@ -373,23 +425,94 @@ function AnalysisReport({
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Income" value={money.format(analysis.income)} note="Confidently classified receipts" tone="green" icon={ArrowUpRight} />
-        <MetricCard label="Expenses" value={money.format(analysis.expenses)} note="Confidently classified outflows" tone="red" icon={ArrowDownRight} />
-        <MetricCard
-          label="Net cash flow"
-          value={money.format(analysis.net)}
-          note={analysis.net >= 0 ? "Income less expenses" : "Expenses exceeded income"}
-          tone={analysis.net >= 0 ? "amber" : "red"}
-          icon={IndianRupee}
-        />
-        <MetricCard label="Transactions" value={count.format(analysis.transactionCount)} note="Dated rows included in totals" tone="slate" icon={FileSpreadsheet} />
-      </div>
+      <Card className="overflow-hidden border-border bg-card shadow-sm">
+        <div className="flex items-center gap-3 border-b border-border px-5 py-4 lg:px-6">
+          <span className="h-8 w-1 rounded-full bg-amber-500" aria-hidden="true" />
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Financial snapshot</h2>
+            <p className="text-xs text-muted-foreground">Classified cash movement from the workbook</p>
+          </div>
+        </div>
+        <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-4">
+          <LedgerMetric label="Money received" value={money.format(analysis.income)} note="Classified receipts" tone="green" />
+          <LedgerMetric label="Money spent" value={money.format(analysis.expenses)} note="Classified outflows" tone="red" />
+          <LedgerMetric label="Net cash flow" value={money.format(analysis.net)} note={analysis.net >= 0 ? "Income exceeded expenses" : "Expenses exceeded income"} tone={analysis.net < 0 ? "red" : "green"} />
+          <LedgerMetric label="Transactions included" value={count.format(analysis.transactionCount)} note="Dated rows used in totals" />
+        </div>
+        <div className="grid border-t border-border bg-muted/20 sm:grid-cols-2 xl:grid-cols-5">
+          {[
+            ["Expense / income", analysis.income > 0 ? `${expenseRatio.toFixed(1)}%` : "—"],
+            ["Average inflow shown", activeMonths ? money.format(averageIncome) : "—"],
+            ["Average outflow shown", activeMonths ? money.format(averageExpenses) : "—"],
+            ["Months shown", count.format(activeMonths)],
+            ["Rows classified", `${rowCoverage.toFixed(1)}%`],
+          ].map(([label, value]) => (
+            <div key={label} className="border-b border-border px-5 py-3 last:border-b-0 sm:border-b sm:[&:nth-last-child(-n+2)]:border-b-0 xl:border-b-0 xl:border-r xl:last:border-r-0">
+              <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+              <p className="mt-1 text-sm font-semibold tabular-nums text-foreground">{value}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="overflow-hidden border-border bg-card shadow-sm">
+        <div className="grid lg:grid-cols-[1.35fr_1fr]">
+          <div className="p-5 lg:p-6">
+            <div className="flex items-center gap-3">
+              <span className="h-7 w-1 rounded-full bg-amber-500" aria-hidden="true" />
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">What stands out</h2>
+                <p className="text-xs text-muted-foreground">A quick reading of this report</p>
+              </div>
+            </div>
+            <ul className="mt-5 space-y-4">
+              <li className="flex gap-3 text-sm leading-6 text-foreground">
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                {analysis.net >= 0
+                  ? `Money received exceeded spending by ${money.format(analysis.net)}.`
+                  : `Spending exceeded money received by ${money.format(Math.abs(analysis.net))}.`}
+              </li>
+              {highestIncomeMonth && (
+                <li className="flex gap-3 text-sm leading-6 text-foreground">
+                  <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                  {highestIncomeMonth.label} had the highest detected inflow at {money.format(highestIncomeMonth.income)}.
+                </li>
+              )}
+              {topExpenseCategory && (
+                <li className="flex gap-3 text-sm leading-6 text-foreground">
+                  <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                  {topExpenseCategory.name} was the largest detected expense category at {money.format(topExpenseCategory.amount)}.
+                </li>
+              )}
+            </ul>
+          </div>
+          <div className="border-t border-border bg-muted/20 p-5 lg:border-l lg:border-t-0 lg:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Data quality</h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">Confidence in the automatic reading</p>
+              </div>
+              <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${confidence === "High" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300" : "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"}`}>{confidence}</span>
+            </div>
+            <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4">
+              <div><dt className="text-[10px] uppercase tracking-wider text-muted-foreground">Included sheets</dt><dd className="mt-1 text-sm font-semibold tabular-nums text-foreground">{includedSheets}</dd></div>
+              <div><dt className="text-[10px] uppercase tracking-wider text-muted-foreground">Review-only sheets</dt><dd className="mt-1 text-sm font-semibold tabular-nums text-foreground">{reviewSheets}</dd></div>
+              <div><dt className="text-[10px] uppercase tracking-wider text-muted-foreground">Missing dates</dt><dd className="mt-1 text-sm font-semibold tabular-nums text-foreground">{count.format(missingDates)}</dd></div>
+              <div><dt className="text-[10px] uppercase tracking-wider text-muted-foreground">Missing amounts</dt><dd className="mt-1 text-sm font-semibold tabular-nums text-foreground">{count.format(missingAmounts)}</dd></div>
+            </dl>
+            {dateRangeNeedsReview && (
+              <p className="mt-5 flex gap-2 border-t border-amber-200 pt-4 text-xs leading-5 text-amber-800 dark:border-amber-900/70 dark:text-amber-300">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> One or more dates may be mistyped or outside the main reporting period. Review the notes before relying on the timeline.
+              </p>
+            )}
+          </div>
+        </div>
+      </Card>
 
       <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Monthly movement</CardTitle>
+            <CardTitle className="text-sm">Monthly movement</CardTitle>
             <p className="text-xs text-muted-foreground">Latest 12 active months found in the workbook</p>
           </CardHeader>
           <CardContent>
@@ -419,7 +542,7 @@ function AnalysisReport({
 
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Largest categories</CardTitle>
+            <CardTitle className="text-sm">Largest categories</CardTitle>
             <p className="text-xs text-muted-foreground">Automatic rice-mill grouping</p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -440,17 +563,18 @@ function AnalysisReport({
               </div>
             ))}
             {analysis.categories.length === 0 && <p className="py-16 text-center text-sm text-muted-foreground">No categories available.</p>}
+            {(topIncomeCategory || topExpenseCategory) && (
+              <p className="border-t border-border pt-3 text-[11px] leading-5 text-muted-foreground">
+                {topIncomeCategory ? `Largest inflow: ${topIncomeCategory.name}. ` : ""}
+                {highestExpenseMonth ? `Highest outflow month: ${highestExpenseMonth.label}.` : ""}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-border bg-card shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Sheet audit</CardTitle>
-          <p className="text-xs text-muted-foreground">Only sheets classified as income or expense contribute to the cash-flow cards.</p>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
+      <ReportDisclosure title="Sheet audit" description="See which worksheets contributed to the totals" countLabel={`${analysis.sheetCount} sheets`}>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[760px] text-sm">
               <thead className="border-y border-border bg-muted/45 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                 <tr>
@@ -486,17 +610,25 @@ function AnalysisReport({
               </tbody>
             </table>
           </div>
-        </CardContent>
-      </Card>
+          <div className="divide-y divide-border md:hidden">
+            {analysis.sheets.map((sheet) => (
+              <div key={sheet.name} className="space-y-3 px-5 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-medium text-foreground">{sheet.name}</p>
+                  <Badge variant="outline" className={sheet.kind === "income" ? "border-emerald-200 text-emerald-700 dark:border-emerald-900 dark:text-emerald-400" : sheet.kind === "expense" ? "border-rose-200 text-rose-700 dark:border-rose-900 dark:text-rose-400" : "text-muted-foreground"}>{kindLabel(sheet.kind)}</Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div><span className="block text-muted-foreground">Entries</span><span className="mt-0.5 block font-medium tabular-nums text-foreground">{count.format(sheet.transactionCount)}</span></div>
+                  <div><span className="block text-muted-foreground">Detected total</span><span className="mt-0.5 block font-medium tabular-nums text-foreground">{sheet.transactionCount ? money.format(sheet.total) : "—"}</span></div>
+                  <div className="col-span-2"><span className="block text-muted-foreground">Date range</span><span className="mt-0.5 block text-foreground">{formatDate(sheet.dateFrom)} – {formatDate(sheet.dateTo)}</span></div>
+                </div>
+              </div>
+            ))}
+          </div>
+      </ReportDisclosure>
 
-      <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <Card className="border-border bg-card shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Largest entries</CardTitle>
-            <p className="text-xs text-muted-foreground">Useful for spotting unusual or high-value transactions</p>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
+      <ReportDisclosure title="Largest entries" description="Inspect unusual or high-value transactions" countLabel={`${analysis.topTransactions.length} entries`}>
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-[640px] text-sm">
                 <thead className="border-y border-border bg-muted/45 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                   <tr>
@@ -520,35 +652,49 @@ function AnalysisReport({
                 </tbody>
               </table>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-card shadow-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              <CardTitle className="text-base">Review notes</CardTitle>
+            <div className="divide-y divide-border md:hidden">
+              {analysis.topTransactions.map((transaction) => (
+                <div key={`${transaction.sheet}-${transaction.row}`} className="px-5 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="min-w-0 font-medium text-foreground">{transaction.description}</p>
+                    <p className={`shrink-0 font-semibold tabular-nums ${transaction.kind === "income" ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>{money.format(transaction.amount)}</p>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{formatDate(transaction.date)} · {transaction.sheet}</p>
+                </div>
+              ))}
             </div>
-            <p className="text-xs text-muted-foreground">Items the automatic analysis could not safely assume</p>
-          </CardHeader>
-          <CardContent>
+      </ReportDisclosure>
+
+      <ReportDisclosure title="Review notes" description="Items the automatic analysis could not safely assume" countLabel={analysis.warnings.length ? `${analysis.warnings.length} notes` : "No issues"} defaultOpen={analysis.warnings.length > 0}>
+          <div className="p-5">
             {analysis.warnings.length > 0 ? (
               <ul className="space-y-3">
-                {analysis.warnings.slice(0, 7).map((warning) => (
+                {visibleNotes.map((warning) => (
                   <li key={warning} className="flex gap-2 text-xs leading-5 text-muted-foreground">
                     <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" /> {warning}
                   </li>
                 ))}
-                {analysis.warnings.length > 7 && <li className="text-xs font-medium text-amber-700 dark:text-amber-400">+ {analysis.warnings.length - 7} more notes</li>}
+                {analysis.warnings.length > 4 && (
+                  <li className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllNotes((current) => !current)}
+                      aria-expanded={showAllNotes}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 transition-colors hover:text-amber-900 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 dark:text-amber-400 dark:hover:text-amber-200"
+                    >
+                      {showAllNotes ? "Show fewer" : `Show all ${analysis.warnings.length} notes`}
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAllNotes ? "rotate-180" : ""}`} />
+                    </button>
+                  </li>
+                )}
               </ul>
             ) : (
-              <div className="flex items-center gap-2 py-8 text-sm text-emerald-700 dark:text-emerald-400">
+              <div className="flex items-center gap-2 py-4 text-sm text-emerald-700 dark:text-emerald-400">
                 <CheckCircle2 className="h-4 w-4" /> No obvious data-quality issues detected.
               </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+      </ReportDisclosure>
     </div>
   );
 }
