@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   ArrowDownRight,
   ArrowUpRight,
-  BarChart3,
   CheckCircle2,
   Clock3,
   Database,
@@ -19,7 +18,6 @@ import {
   LoaderCircle,
   RefreshCw,
   ShieldCheck,
-  Sparkles,
   Trash2,
   UploadCloud,
 } from "lucide-react";
@@ -228,19 +226,16 @@ function EmptyAnalyzer({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div className="max-w-2xl">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
-          <Sparkles className="h-3.5 w-3.5" /> Personal workbook analyzer
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">Turn your mill accounts into a clear report.</h1>
-        <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground md:text-base">
-          Upload an Excel workbook to see income, expenses, cash flow, monthly movement, categories, large entries, and data-quality problems.
+    <div className="mx-auto max-w-4xl space-y-7">
+      <div className="max-w-xl">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Excel analysis</h1>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Upload an .xlsx workbook to create a complete financial report.
         </p>
       </div>
 
-      <Card className="overflow-hidden border-amber-200 bg-card shadow-sm dark:border-amber-900/70">
-        <CardContent className="p-3 sm:p-5">
+      <Card className="overflow-hidden border-border bg-card shadow-sm">
+        <CardContent className="p-3 sm:p-4">
           <label
             htmlFor="workbook-upload"
             tabIndex={busy ? -1 : 0}
@@ -266,10 +261,10 @@ function EmptyAnalyzer({
               const file = event.dataTransfer.files[0];
               if (file) onFile(file);
             }}
-            className={`group flex min-h-72 w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-12 text-center transition-all ${
+            className={`group flex min-h-64 w-full flex-col items-center justify-center rounded-2xl border border-dashed px-5 py-10 text-center transition-all ${
               dragging
                 ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30"
-                : "border-amber-200 bg-gradient-to-b from-amber-50/70 to-background hover:border-amber-400 dark:border-amber-900 dark:from-amber-950/20 dark:hover:border-amber-700"
+                : "border-amber-300/80 bg-amber-50/35 hover:border-amber-500 hover:bg-amber-50/60 dark:border-amber-900/80 dark:bg-amber-950/10 dark:hover:border-amber-700 dark:hover:bg-amber-950/20"
             } ${busy ? "cursor-wait" : "cursor-pointer"}`}
           >
             <input
@@ -285,8 +280,8 @@ function EmptyAnalyzer({
                 event.currentTarget.value = "";
               }}
             />
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 transition-transform group-hover:-translate-y-0.5 dark:bg-amber-900/50 dark:text-amber-300">
-              {busy ? <LoaderCircle className="h-8 w-8 animate-spin" /> : <UploadCloud className="h-8 w-8" />}
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 transition-transform group-hover:-translate-y-0.5 dark:bg-amber-900/50 dark:text-amber-300">
+              {busy ? <LoaderCircle className="h-7 w-7 animate-spin" /> : <UploadCloud className="h-7 w-7" />}
             </div>
             <p className="text-lg font-semibold text-foreground">{busy ? "Reading every worksheet…" : "Drop your Excel file here"}</p>
             <p className="mt-1 text-sm text-muted-foreground">or click to choose a .xlsx file, up to 20 MB</p>
@@ -306,19 +301,6 @@ function EmptyAnalyzer({
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {[
-          { icon: ShieldCheck, title: "Private by design", text: "The workbook stays in your browser and is never sent to a server." },
-          { icon: BarChart3, title: "Messy-sheet friendly", text: "Finds headers, dates, descriptions, and amounts across multiple sheets." },
-          { icon: CheckCircle2, title: "Rice-mill categories", text: "Groups bran, husk, broken rice, paddy, transport, labour, repairs, and more." },
-        ].map((item) => (
-          <div key={item.title} className="rounded-xl border border-border bg-card p-4">
-            <item.icon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            <p className="mt-3 text-sm font-semibold text-foreground">{item.title}</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.text}</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
