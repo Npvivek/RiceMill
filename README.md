@@ -5,7 +5,7 @@
 - **Current dashboard:** analyzes `.xlsx` workbooks in the browser. Original files stay on the device; saved reports use Supabase Postgres with Row Level Security.
 - **v2 API:** Python/FastAPI on Render validates Supabase JWTs, scopes access through `workspace_members` and the restricted `mill_runtime` role, and contains a deterministic LangGraph shell. It does not yet power workbook imports or call an external model.
 
-See the [documentation index](tasks/README.md) for read order and current status; [business context](docs/business-context.md) holds historical domain notes.
+See the [documentation index](tasks/README.md) for read order and current status.
 
 ## Frontend
 
