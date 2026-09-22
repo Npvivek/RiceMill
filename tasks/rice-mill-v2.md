@@ -4,7 +4,7 @@
 
 **Release:** [PR #1](https://github.com/Npvivek/RiceMill/pull/1) merged `codex/ai-backend-foundation` into `main`. Vercel marked merge commit `3d4ad7f` Ready in Production and assigned `rice-mill-steel.vercel.app` on 2026-09-23.
 
-**Milestone B branch:** [PR #2](https://github.com/Npvivek/RiceMill/pull/2) is a draft against `main` at `b75aff0`. Its implementation has passed local checks and a manual live two-workspace isolation probe; it is not merged into the production branch. Do not call Milestone B released until the pending items below are resolved.
+**Milestone B branch:** [PR #2](https://github.com/Npvivek/RiceMill/pull/2) is a draft against `main`. Its authorization implementation was verified at `b75aff0`, and the legacy cleanup was added at `6f22099`. It is not merged into the production branch. Do not call Milestone B released until the pending items below are resolved.
 
 ## Completed
 
@@ -56,7 +56,7 @@
 - [ ] Verify signed-in, signed-out, expired-session, slow-network, cold/warm dashboard navigation with production builds. Collect at least 20 samples per relevant scenario before claiming the p95 target.
 - [ ] Recheck Render/Supabase free-tier limits and run an export/restore drill before relying on hosted business data.
 - [x] Verify the cleanup locally: Ruff passed; mypy passed on 16 files; pytest passed 17 tests with 1 opt-in live test skipped; API contract check, frontend ESLint, and production build passed. The OpenAPI output is unchanged.
-- [ ] Verify the cleanup Docker image build and `/health/live` and `/health/ready` after branch deployment. Docker/Podman is not installed in the local shell, so a local container build was unavailable.
+- [x] Verify the cleanup Docker image on Render: deploy `dep-dapelv2jnfac738706b0` built commit `6f22099`, reached Live, and returned HTTP 200 from both `/health/live` and `/health/ready` on 2026-09-23. Docker/Podman is not installed in the local shell, so no local container build was run.
 
 ## Explicitly deferred
 
