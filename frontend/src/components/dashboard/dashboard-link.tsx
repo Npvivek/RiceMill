@@ -16,10 +16,7 @@ function DashboardLinkLabel({ requested, delayed, retry }: { requested: boolean;
 
   return (
     <>
-      <LoaderCircle
-        aria-hidden
-        className={cn("size-3.5 animate-spin", isOpening ? "opacity-100" : "opacity-0")}
-      />
+      {isOpening && <LoaderCircle aria-hidden className="size-3.5 animate-spin" />}
       <span>{retry ? "Try dashboard again" : isOpening ? delayed ? "Still opening…" : "Opening…" : "Mill Dashboard"}</span>
       <span className="sr-only" role="status" aria-live="polite">
         {retry ? "Dashboard is taking longer than expected. Try again." : isOpening ? "Opening" : ""}
