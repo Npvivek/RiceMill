@@ -4,6 +4,8 @@
 
 **Release:** [PR #1](https://github.com/Npvivek/RiceMill/pull/1) merged `codex/ai-backend-foundation` into `main`. Vercel marked merge commit `3d4ad7f` Ready in Production and assigned `rice-mill-steel.vercel.app` on 2026-09-23.
 
+**Milestone B branch:** [PR #2](https://github.com/Npvivek/RiceMill/pull/2) is a draft against `main` at `b75aff0`. Its implementation has passed local checks and a manual live two-workspace isolation probe; it is not merged into the production branch. Do not call Milestone B released until the pending items below are resolved.
+
 ## Completed
 
 - [x] Write and store the implementation spec.
@@ -17,11 +19,19 @@
 - [x] Paginate saved report history and lazy-load workbook/PDF libraries only when used.
 - [x] Run backend lint/tests and frontend lint/build before the last implementation commit.
 
-## Pending: Milestone B completion
+## Milestone B implementation on PR #2
 
-- [ ] Connect workspace authorization to `workspaces` and `workspace_members`; do not trust a caller-supplied workspace or user ID.
-- [ ] Add a restricted Postgres runtime connection and enforce equivalent workspace access for direct SQL and graph checkpoints.
-- [ ] Generate and consume TypeScript types from the FastAPI OpenAPI contract.
+- [x] Resolve identity from validated Supabase JWTs and workspace access from `workspace_members`; deny requests for other workspaces. Unit tests cover spoofed IDs and invalid token audience, issuer, and expiry.
+- [x] Use restricted `mill_runtime` SQLAlchemy sessions and membership-scoped direct SQL and LangGraph checkpoints. Additive RLS migrations were applied. A manual live probe with two synthetic workspaces tested foreign read/write denial, checkpoint access, and pooled-claim reset; all synthetic rows were removed. The opt-in pytest live integration test remains skipped locally without an admin DSN.
+- [x] Commit the FastAPI OpenAPI schema and generated TypeScript client/types, with a contract-drift check. The browser report workflow does not call the v2 API yet.
+- [x] Verify the Render session pooler on port 5432 across an actual service restart: deploy `dep-dapdokss728c73ehd1kg` returned HTTP 200 from `/health/ready` before and after the restart on 2026-09-23.
+- [x] Run Ruff, mypy (16 files), pytest (17 passed, 1 opt-in live test skipped), frontend ESLint/build, and the OpenAPI drift check on PR #2 before this cleanup.
+
+## Pending: Milestone B release
+
+- [ ] Rotate the short `mill_runtime` database password in Supabase and update only Render's `RUNTIME_DATABASE_URL` secret. The owner deferred this step; do not record the password in Git or chat.
+- [ ] Review and merge PR #2 into `main`, then verify Vercel production and Render's deployed branch/commit and readiness endpoint.
+- [ ] Automate the live RLS integration test when an isolated admin-only test URL is available. The current branch has manual live isolation evidence; never put migration credentials on the web service.
 
 ## Pending: Milestone C — canonical import
 
@@ -45,6 +55,8 @@
 - [x] Merge PR #1 into Vercel's verified production branch (`main`) and confirm its production deployment is Ready on `rice-mill-steel.vercel.app`.
 - [ ] Verify signed-in, signed-out, expired-session, slow-network, cold/warm dashboard navigation with production builds. Collect at least 20 samples per relevant scenario before claiming the p95 target.
 - [ ] Recheck Render/Supabase free-tier limits and run an export/restore drill before relying on hosted business data.
+- [x] Verify the cleanup locally: Ruff passed; mypy passed on 16 files; pytest passed 17 tests with 1 opt-in live test skipped; API contract check, frontend ESLint, and production build passed. The OpenAPI output is unchanged.
+- [ ] Verify the cleanup Docker image build and `/health/live` and `/health/ready` after branch deployment. Docker/Podman is not installed in the local shell, so a local container build was unavailable.
 
 ## Explicitly deferred
 
