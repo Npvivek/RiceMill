@@ -98,14 +98,19 @@ service. Its pool is bounded to two connections with no overflow. The
 `MIGRATION_DATABASE_URL` or SQL Editor admin session is used separately to apply
 `supabase/migrations/*.sql`; it must never be configured on Render or Vercel.
 Apply `202609230001_runtime_workspace_role.sql` after the earlier workspace
-migration, then set a random password for `mill_runtime` outside Git and store
+migration, followed by `202609230002_runtime_membership_claim.sql`. Supabase's
+SQL Editor role cannot grant `mill_runtime` usage on the `auth` schema, so the
+second migration makes its membership policy read the transaction-local,
+verified JWT subject directly. Then set a long random password for
+`mill_runtime` outside Git and store
 the resulting session-pooler URL only in Render's `RUNTIME_DATABASE_URL` secret.
 
 For the optional live RLS integration test, provide `TEST_MIGRATION_DATABASE_URL`,
-`TEST_RUNTIME_DATABASE_URL`, and two existing Supabase Auth user IDs as
-`TEST_USER_A` and `TEST_USER_B`; run
+`TEST_RUNTIME_DATABASE_URL`, and one existing Supabase Auth user ID as
+`TEST_USER_A`; run
 `.venv/bin/pytest -q tests/test_workspace_rls_integration.py`. It creates only
-synthetic rows and removes them. Run this before claiming database isolation.
+synthetic rows in two workspaces, removes membership from one, then cleans up.
+Run this before claiming database isolation.
 After deployment, call `/health/ready` (requires a real `mill_runtime`
 connection), restart the **service process** in Render, and call it again.
 Record the deploy/restart identifier and both HTTP results; a successful
