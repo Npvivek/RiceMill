@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Phone, MapPin, Wheat, ArrowRight, Package, Flame, CheckCircle, Scale, Shield, Droplets, ShieldCheck, Receipt, Landmark, Factory, Award } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { FloatingWhatsApp } from "@/components/ui/whatsapp-button";
+import { DashboardLink } from "@/components/dashboard/dashboard-link";
 
 const products = [
   {
@@ -73,11 +74,7 @@ export default function HomePage() {
             <Link href="/products" className="text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Products</Link>
             <a href="/contact" className="text-sm text-muted-foreground hover:text-amber-700 dark:hover:text-amber-400 hidden sm:block transition-colors px-2">Contact</a>
             <ThemeToggle />
-            <Link href="/dashboard">
-              <Button size="sm" variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 ml-1">
-                Mill Dashboard
-              </Button>
-            </Link>
+            <DashboardLink />
           </div>
         </div>
       </nav>

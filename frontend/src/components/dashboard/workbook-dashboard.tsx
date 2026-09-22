@@ -1,6 +1,5 @@
 "use client";
 
-import readExcelFile from "read-excel-file/browser";
 import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
@@ -23,7 +22,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { analyzeWorkbook, type WorkbookAnalysis, type WorkbookSheet } from "@/lib/excel-analysis";
-import { downloadAnalysisPdf } from "@/lib/pdf-report";
 import {
   deserializeAnalysis,
   hashWorkbook,
@@ -35,6 +33,7 @@ import {
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const REPORTS_PAGE_SIZE = 20;
 
 const money = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -124,6 +123,9 @@ function SavedReports({
   onDownload,
   onDelete,
   onExport,
+  hasMore,
+  loadingMore,
+  onLoadMore,
 }: {
   reports: ReportSummary[];
   loading: boolean;
@@ -133,6 +135,9 @@ function SavedReports({
   onDownload: (id: string) => void;
   onDelete: (id: string) => void;
   onExport: () => void;
+  hasMore: boolean;
+  loadingMore: boolean;
+  onLoadMore: () => void;
 }) {
   return (
     <section className="mx-auto max-w-6xl">
@@ -211,6 +216,14 @@ function SavedReports({
                 </div>
               </article>
             ))}
+            {hasMore && (
+              <div className="flex justify-center px-5 py-4">
+                <Button type="button" variant="outline" size="sm" onClick={onLoadMore} disabled={loadingMore} className="gap-2">
+                  {loadingMore && <LoaderCircle className="h-3.5 w-3.5 animate-spin" />}
+                  {loadingMore ? "Loading more reports…" : "Load more reports"}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Card>
@@ -363,6 +376,7 @@ function AnalysisReport({
     setPdfBusy(true);
     setPdfError(null);
     try {
+      const { downloadAnalysisPdf } = await import("@/lib/pdf-report");
       await downloadAnalysisPdf(analysis);
     } catch (reason) {
       console.error(reason);
@@ -709,6 +723,8 @@ export function WorkbookDashboard({ view }: { view: "analyzer" | "reports" }) {
   const [reportsLoading, setReportsLoading] = useState(true);
   const [reportsError, setReportsError] = useState<string | null>(null);
   const [reportActionId, setReportActionId] = useState<string | null>(null);
+  const [hasMoreReports, setHasMoreReports] = useState(false);
+  const [loadingMoreReports, setLoadingMoreReports] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -719,10 +735,16 @@ export function WorkbookDashboard({ view }: { view: "analyzer" | "reports" }) {
         const { data, error: queryError } = await supabase
           .from("reports")
           .select(REPORT_SUMMARY_COLUMNS)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .range(0, REPORTS_PAGE_SIZE);
 
         if (queryError) throw queryError;
-        if (active) setReports((data ?? []) as unknown as ReportSummary[]);
+        if (active) {
+          const loaded = (data ?? []) as unknown as ReportSummary[];
+          const page = loaded.slice(0, REPORTS_PAGE_SIZE);
+          setReports(page);
+          setHasMoreReports(loaded.length > REPORTS_PAGE_SIZE);
+        }
       } catch (reason) {
         console.error(reason);
         if (active) setReportsError("Connect Supabase and run the reports migration to enable saved history.");
@@ -736,6 +758,29 @@ export function WorkbookDashboard({ view }: { view: "analyzer" | "reports" }) {
       active = false;
     };
   }, []);
+
+  async function loadMoreReports() {
+    setLoadingMoreReports(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data, error: queryError } = await supabase
+        .from("reports")
+        .select(REPORT_SUMMARY_COLUMNS)
+        .order("created_at", { ascending: false })
+        .range(reports.length, reports.length + REPORTS_PAGE_SIZE);
+
+      if (queryError) throw queryError;
+      const loaded = (data ?? []) as unknown as ReportSummary[];
+      const page = loaded.slice(0, REPORTS_PAGE_SIZE);
+      setReports((current) => [...current, ...page]);
+      setHasMoreReports(loaded.length > REPORTS_PAGE_SIZE);
+    } catch (reason) {
+      console.error(reason);
+      toast.error("The next page of saved reports could not be loaded.");
+    } finally {
+      setLoadingMoreReports(false);
+    }
+  }
 
   async function fetchSavedReport(id: string): Promise<SavedReport> {
     const supabase = createSupabaseBrowserClient();
@@ -802,6 +847,7 @@ export function WorkbookDashboard({ view }: { view: "analyzer" | "reports" }) {
     setReportActionId(id);
     try {
       const report = await fetchSavedReport(id);
+      const { downloadAnalysisPdf } = await import("@/lib/pdf-report");
       await downloadAnalysisPdf(deserializeAnalysis(report.analysis));
     } catch (reason) {
       console.error(reason);
@@ -868,6 +914,7 @@ export function WorkbookDashboard({ view }: { view: "analyzer" | "reports" }) {
 
     setBusy(true);
     try {
+      const { default: readExcelFile } = await import("read-excel-file/browser");
       const sheets = await readExcelFile(file);
       const result = analyzeWorkbook(file.name, sheets as unknown as WorkbookSheet[]);
       setAnalysis(result);
@@ -913,6 +960,9 @@ export function WorkbookDashboard({ view }: { view: "analyzer" | "reports" }) {
         onDownload={downloadSavedPdf}
         onDelete={deleteSavedReport}
         onExport={exportReportBackup}
+        hasMore={hasMoreReports}
+        loadingMore={loadingMoreReports}
+        onLoadMore={loadMoreReports}
       />
     );
   }

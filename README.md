@@ -11,6 +11,7 @@ Marketing website and private, browser-based Excel analysis workspace for a fami
 - Contact enquiries sent through WhatsApp
 - Email/passcode-protected dashboard at `/dashboard` for analyzing rice-mill `.xlsx` account workbooks
 - Persistent, account-private report history backed by Supabase Postgres
+- A v2 FastAPI/LangGraph foundation with Supabase JWT validation. It is not yet connected to the workbook import UI, and it makes no external model calls.
 
 The Excel analyzer runs completely in the browser. Original workbooks are not uploaded, stored, or sent to an API. The generated analysis is saved privately so reports can be reopened later. It detects transaction tables across multiple sheets and reports:
 
@@ -30,15 +31,21 @@ Browser
     └── Private report history → Supabase Postgres + Row Level Security
 
 Next.js 16 + React 19 → Vercel
+
+FastAPI v2 → Render Docker service
+├── Verifies Supabase access tokens against the project's signing keys
+├── Provides liveness, readiness, and identity endpoints
+└── Contains a bounded deterministic LangGraph analysis foundation
 ```
 
-The previous FastAPI/PostgreSQL application remains in `backend/` as legacy code for now, but the deployed frontend does not need it. Supabase handles authentication and report persistence directly for the Next.js application.
+The existing report workflow remains browser-only and does not wait for the Python service. The legacy FastAPI routers remain in `backend/`, but only the v2 service is mounted by `backend/app/main.py`.
 
 ## Supabase setup
 
 1. Create users manually under **Authentication → Users**. Public signup is intentionally not exposed.
 2. Run `supabase/migrations/202608020001_create_reports.sql` in the Supabase SQL Editor.
-3. Configure the following locally and in Vercel:
+3. Run `supabase/migrations/202609220001_create_workspace_analysis.sql` to add the v2 workspace, import, ledger, analysis, and private-workbook Storage schema. This additive migration does not alter existing reports.
+4. Configure the following locally and in Vercel:
 
 ```text
 NEXT_PUBLIC_SITE_URL=https://your-vercel-domain.example
@@ -54,6 +61,29 @@ https://your-vercel-domain.example/auth/callback
 ```
 
 Only the publishable key is used by the application. Report access is enforced with Row Level Security using the logged-in Supabase user ID.
+
+## Python v2 service
+
+`render.yaml` defines the initial free Docker web service. Before enabling it in Render, configure these environment variables there:
+
+```text
+CORS_ORIGINS=https://rice-mill-steel.vercel.app,http://localhost:3000
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_JWKS_URL=https://your-project-ref.supabase.co/auth/v1/.well-known/jwks.json
+```
+
+No external model provider is configured. Adding one later requires a new implementation decision, an explicit provider configuration, and sanitized evaluation fixtures.
+
+Local checks:
+
+```bash
+cd backend
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn app.main:app --reload
+.venv/bin/ruff check app/v2 tests
+.venv/bin/pytest -q
+```
 
 ## Local development
 
