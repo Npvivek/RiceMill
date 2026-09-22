@@ -10,3 +10,4 @@ openpyxl==3.1.5
 langgraph==1.2.11
 pytest==8.3.4
 ruff==0.9.2
+mypy==1.18.2

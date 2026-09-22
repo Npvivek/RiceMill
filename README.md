@@ -70,6 +70,7 @@ Only the publishable key is used by the application. Report access is enforced w
 CORS_ORIGINS=https://rice-mill-steel.vercel.app,http://localhost:3000
 SUPABASE_URL=https://your-project-ref.supabase.co
 SUPABASE_JWKS_URL=https://your-project-ref.supabase.co/auth/v1/.well-known/jwks.json
+RUNTIME_DATABASE_URL=postgresql+psycopg://mill_runtime.PROJECT_REF:PASSWORD@REGION.pooler.supabase.com:5432/postgres
 ```
 
 No external model provider is configured. Adding one later requires a new implementation decision, an explicit provider configuration, and sanitized evaluation fixtures.
@@ -82,8 +83,42 @@ python -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --reload
 .venv/bin/ruff check app/v2 tests
+.venv/bin/mypy --follow-imports=silent --ignore-missing-imports --exclude 'app/v2/ai/graph.py' app/v2 scripts/export_openapi.py
 .venv/bin/pytest -q
+cd .. && ./scripts/check-api-contract.sh
 ```
+
+The v2 API uses the Supabase **session pooler on port 5432**. The request
+transaction uses `SET LOCAL` RLS claims, and session mode supports Psycopg's
+prepared statements and the checkpoint connection. The transaction pooler on
+port 6543 does not support prepared statements. The runtime role is
+`mill_runtime`, has no BYPASSRLS or
+ownership privileges, and is the only database credential read by the v2 web
+service. Its pool is bounded to two connections with no overflow. The
+`MIGRATION_DATABASE_URL` or SQL Editor admin session is used separately to apply
+`supabase/migrations/*.sql`; it must never be configured on Render or Vercel.
+Apply `202609230001_runtime_workspace_role.sql` after the earlier workspace
+migration, then set a random password for `mill_runtime` outside Git and store
+the resulting session-pooler URL only in Render's `RUNTIME_DATABASE_URL` secret.
+
+For the optional live RLS integration test, provide `TEST_MIGRATION_DATABASE_URL`,
+`TEST_RUNTIME_DATABASE_URL`, and two existing Supabase Auth user IDs as
+`TEST_USER_A` and `TEST_USER_B`; run
+`.venv/bin/pytest -q tests/test_workspace_rls_integration.py`. It creates only
+synthetic rows and removes them. Run this before claiming database isolation.
+After deployment, call `/health/ready` (requires a real `mill_runtime`
+connection), restart the **service process** in Render, and call it again.
+Record the deploy/restart identifier and both HTTP results; a successful
+local app reconnect without a process restart does not satisfy this check.
+
+The FastAPI OpenAPI document is served at `/openapi.json` even when Swagger UI
+is disabled. Regenerate the committed contract with
+`PYTHONPATH=backend backend/.venv/bin/python backend/scripts/export_openapi.py`
+and `cd frontend && npx openapi-typescript ../backend/openapi.json -o src/lib/api/schema.d.ts`.
+`npm run check:api` checks both committed OpenAPI against the live FastAPI app
+schema and generated TypeScript against that document. Set
+`NEXT_PUBLIC_V2_API_URL` to the Render API origin before calling the typed v2
+client from the browser; the existing report dashboard does not depend on it.
 
 ## Local development
 
