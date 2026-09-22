@@ -2,7 +2,7 @@
 
 **Source of truth:** [backend, dashboard, and AI implementation spec](../specs/ai-backend-and-dashboard.md)
 
-**Implementation branch:** `codex/ai-backend-foundation` (until merged into `main`).
+**Release:** [PR #1](https://github.com/Npvivek/RiceMill/pull/1) merged `codex/ai-backend-foundation` into `main`. Vercel marked merge commit `3d4ad7f` Ready in Production and assigned `rice-mill-steel.vercel.app` on 2026-09-23.
 
 ## Completed
 
@@ -42,7 +42,7 @@
 
 ## Release and deployment work
 
-- [ ] Merge this branch into the Git branch configured as Vercel's production branch (normally `main`), then verify the Vercel production deployment.
+- [x] Merge PR #1 into Vercel's verified production branch (`main`) and confirm its production deployment is Ready on `rice-mill-steel.vercel.app`.
 - [ ] Verify signed-in, signed-out, expired-session, slow-network, cold/warm dashboard navigation with production builds. Collect at least 20 samples per relevant scenario before claiming the p95 target.
 - [ ] Recheck Render/Supabase free-tier limits and run an export/restore drill before relying on hosted business data.
 
