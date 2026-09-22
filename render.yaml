@@ -21,3 +21,5 @@ services:
         sync: false
       - key: SUPABASE_JWT_AUDIENCE
         value: authenticated
+      - key: RUNTIME_DATABASE_URL
+        sync: false

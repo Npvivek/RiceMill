@@ -23,10 +23,10 @@ def build_analysis_graph(
 ):
     """Build the bounded deterministic workflow from injected analysis steps."""
     graph = StateGraph(AnalysisState)
-    graph.add_node("assess_quality", assess_quality)
-    graph.add_node("compute_metrics", compute_metrics)
-    graph.add_node("investigate", investigate)
-    graph.add_node("validate_findings", validate_findings)
+    graph.add_node("assess_quality", assess_quality)  # type: ignore[call-overload]
+    graph.add_node("compute_metrics", compute_metrics)  # type: ignore[call-overload]
+    graph.add_node("investigate", investigate)  # type: ignore[call-overload]
+    graph.add_node("validate_findings", validate_findings)  # type: ignore[call-overload]
     graph.add_edge(START, "assess_quality")
     graph.add_edge("assess_quality", "compute_metrics")
     graph.add_edge("compute_metrics", "investigate")

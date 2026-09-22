@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str = Field(default="", validation_alias="SUPABASE_JWT_SECRET")
     supabase_jwt_audience: str = Field(default="authenticated", validation_alias="SUPABASE_JWT_AUDIENCE")
     docs_enabled: bool = Field(default=True, validation_alias="DOCS_ENABLED")
+    runtime_database_url: str = Field(default="", validation_alias="RUNTIME_DATABASE_URL", repr=False)
 
     @property
     def cors_origins(self) -> list[str]:

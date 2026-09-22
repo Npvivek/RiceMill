@@ -16,6 +16,12 @@ def test_live_health_does_not_require_configuration() -> None:
     assert response.json() == {"status": "ok", "service": "rice-mill-api"}
 
 
+def test_openapi_schema_exposes_workspace_contract() -> None:
+    response = client.get("/openapi.json")
+    assert response.status_code == 200
+    assert "/v2/workspaces/{workspace_id}" in response.json()["paths"]
+
+
 def test_identity_endpoint_requires_a_bearer_token() -> None:
     response = client.get("/v2/me")
 

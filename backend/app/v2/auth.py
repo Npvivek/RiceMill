@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from functools import lru_cache
+from uuid import UUID
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -61,5 +62,9 @@ def get_current_user(
     subject = claims.get("sub")
     if not isinstance(subject, str) or not subject:
         raise authentication_error()
+    try:
+        UUID(subject)
+    except ValueError as error:
+        raise authentication_error() from error
     email = claims.get("email")
     return AuthenticatedUser(id=subject, email=email if isinstance(email, str) else None)
