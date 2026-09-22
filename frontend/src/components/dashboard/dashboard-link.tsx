@@ -20,9 +20,9 @@ function DashboardLinkLabel({ requested, delayed, retry }: { requested: boolean;
         aria-hidden
         className={cn("size-3.5 animate-spin", isOpening ? "opacity-100" : "opacity-0")}
       />
-      <span>{retry ? "Try dashboard again" : isOpening ? delayed ? "Still opening…" : "Opening dashboard…" : "Mill Dashboard"}</span>
+      <span>{retry ? "Try dashboard again" : isOpening ? delayed ? "Still opening…" : "Opening…" : "Mill Dashboard"}</span>
       <span className="sr-only" role="status" aria-live="polite">
-        {retry ? "Dashboard is taking longer than expected. Try again." : isOpening ? "Opening dashboard" : ""}
+        {retry ? "Dashboard is taking longer than expected. Try again." : isOpening ? "Opening" : ""}
       </span>
     </>
   );
