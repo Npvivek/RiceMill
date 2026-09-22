@@ -1,6 +1,6 @@
 # Rice mill v2 handoff
 
-**Source of truth:** [implementation spec](../specs/ai-backend-and-dashboard.md) (unchanged).
+**Source of truth:** [implementation spec](../specs/ai-backend-and-dashboard.md).
 
 **Status:** [PR #2](https://github.com/Npvivek/RiceMill/pull/2) merged into `main` as `5cc4e60` on 2026-09-23. Vercel Production succeeded; Render tracks `main` and deployed `dep-dapeqt8473hc73982v30`. The live frontend, `/health/live`, and `/health/ready` returned HTTP 200. Milestone B code is deployed; credential rotation remains open.
 

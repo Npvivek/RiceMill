@@ -1,7 +1,8 @@
 # Rice mill backend, AI analysis, and dashboard implementation spec
 
 Date: 2026-09-22
-Status: Partially implemented. Milestone A and the HTTP/auth foundation of Milestone B are complete; canonical imports, ledger, durable analysis runs, and their frontend remain pending. This document authorizes no purchases.
+Updated: 2026-09-23
+Status: behavior spec. See the [active handoff](../tasks/rice-mill-v2.md) for progress and the [dated recon](../tasks/rice-mill-v2-recon-2026-09-23.md) for code evidence. No purchases authorized.
 
 ## 1. Outcome and decisions
 
@@ -10,35 +11,21 @@ Build a reliable accounts workspace for two users, the owner and his father, and
 - Frontend: existing Next.js/React application in TypeScript, deployed on Vercel.
 - Backend: Python FastAPI, hosted as a Docker web service on Render initially.
 - Data: existing Supabase project for Auth, Postgres, and private Storage.
-- AI orchestration: Python LangGraph, initially deterministic and tool-driven. Durable Postgres checkpoints remain a pending implementation item.
-- External model access: deferred. This release contains no provider adapter, provider key, or model budget.
-- Jev: excluded from this release and will be reconsidered in a separate spec if needed.
-- First implementation milestone: responsive, truthful dashboard navigation and measured performance improvements.
+- AI orchestration: deterministic, tool-driven Python LangGraph with durable Postgres checkpoints.
+- External models, including Jev: excluded; see §10.
 - Default business workspace: both manually provisioned users can access new family-mill records. Existing account-private reports remain private until explicitly migrated.
 
 Assumptions: occasional workbook imports; modest datasets; no requirement for unattended overnight processing or always-on availability. Revisit hosting if these assumptions change.
 
 ## 2. Verified constraints and unresolved integration details
 
-Supabase hosted Edge Functions use Deno/TypeScript, so they are not the Python host. Retain Supabase as the managed data/auth backend and run Python separately [S1].
+Supabase Edge Functions use Deno/TypeScript; run Python separately [S1]. Render Free sleeps after 15 idle minutes, may take about a minute to wake, and has ephemeral local storage [S2]. Keep dashboard shell/history independent of Python; show a backend-starting state for imports and analysis. Do not send keep-alive traffic. Upgrade hosting if wake time becomes unacceptable.
 
-Render Free services sleep after 15 minutes without inbound traffic and can take about one minute to wake; their local filesystem is ephemeral [S2]. The dashboard shell and saved-history reads must not depend on waking Python. New imports and AI operations must display a backend-starting state. Do not use artificial keep-alive traffic. Upgrade the Python service if the wake-up delay becomes unacceptable.
+Supabase Free listed 500 MB database storage, 1 GB file storage, possible inactivity pauses, and no automatic backups when checked on 2026-09-22 [S3]. Retain original workbooks and test export/restore. Recheck limits before relying on hosted data.
 
-Supabase Free currently provides 500 MB database storage and 1 GB file storage, can pause after a week of inactivity, and does not include automatic backups [S3]. Keep original workbooks and implement an export/restore procedure. Free infrastructure is a starting assumption, not a reliability guarantee.
+## 3. Repository state
 
-No external model integration is enabled. The deterministic pipeline must remain useful without one. Any future provider proposal must be separately specified, verified with sanitized fixtures, and assigned an explicit budget before implementation.
-
-## 3. Current repository findings
-
-- `frontend/src/app/page.tsx`: Mill Dashboard is a link wrapping a button, without a client pending state.
-- `frontend/src/lib/supabase/proxy.ts` and `frontend/src/app/dashboard/layout.tsx`: each calls `auth.getUser()`. This is a potential repeated network check, not a measured root cause.
-- No dashboard route loading boundary was found in the inspected file inventory.
-- `frontend/src/components/dashboard/workbook-dashboard.tsx`: report history is fetched after mount without pagination.
-- `frontend/src/lib/excel-analysis.ts`: browser parser uses keyword heuristics, whole-sheet direction classification, one amount column, and exclusions for missing fields. Returned analysis retains only ten transactions and twelve monthly summaries.
-- `frontend/src/lib/reports.ts`: saved report shape cannot reconstruct the full source ledger.
-- `backend/` is legacy FastAPI with separate local-user authentication and startup `create_all`. It is not the deployed backend and must not be exposed unchanged.
-
-Observed code establishes these facts. Device-specific latency, bundle cost, and hosting/network contributions still need measurement.
+See the [2026-09-23 recon](../tasks/rice-mill-v2-recon-2026-09-23.md) for dated code findings. Verify changed code before acting on that snapshot.
 
 ## 4. Architecture
 
@@ -54,15 +41,12 @@ Python / FastAPI on Render
   |-- openpyxl parser + Pydantic validation + Decimal arithmetic
   |-- deterministic SQL/Python analysis tools
   |-- LangGraph: plan -> tools -> findings -> validation
-  |-- deterministic analysis stages; external model provider deferred
   `-- Postgres: canonical records, jobs, evidence, checkpoints
 ```
 
 Use one Python web service initially. No Redis, Celery, vector database, or separate worker is required for this bounded first release. Run one Uvicorn worker initially; durable job ownership is still enforced in Postgres. Separate a worker later if unattended execution becomes a requirement.
 
 ## 5. Milestone A: navigation feedback and performance
-
-Implement this independently before backend migration.
 
 ### Required interaction
 
@@ -97,7 +81,7 @@ Acceptance: feedback within 100 ms of an ordinary click on the tested device; re
 - Use SQLAlchemy/psycopg with a small bounded pool. Choose a Supabase connection/pooler mode compatible with both ORM transactions and LangGraph checkpoint requirements; prove connection/restart behavior in the deployment spike.
 - Expose generated OpenAPI contracts and generate TypeScript client types to avoid handwritten duplicate schemas.
 
-Proposed modules: `api/`, `auth/`, `db/`, `imports/`, `analytics/`, `ai/graph.py`, `jobs/`, `tests/`. Use Pydantic settings, locked dependencies, Ruff, pytest, and a type checker. Do not add a provider key or adapter to this release.
+Use Pydantic settings, locked dependencies, Ruff, pytest, and a type checker.
 
 ## 7. Milestone C: canonical import and storage
 
@@ -147,7 +131,7 @@ Typed, bounded, read-only tools:
 - `find_duplicate_candidates(version_id)`
 - `find_unusual_entries(version_id, method_parameters)`
 
-Code enforces authorization, date/filter validity, pagination, and result-size limits. The model cannot run arbitrary SQL, Python, or write financial records. Percentage changes with a zero baseline return undefined with an explanation. Compare equivalent periods and flag incomplete months or insufficient samples.
+Code enforces authorization, date/filter validity, pagination, and result-size limits. Analysis stages cannot run arbitrary SQL, Python, or write financial records. Percentage changes with a zero baseline return undefined with an explanation. Compare equivalent periods and flag incomplete months or insufficient samples.
 
 Graph:
 
@@ -159,7 +143,7 @@ load version -> assess quality -> compute baseline
   -> persist complete or partial report
 ```
 
-Initial per-run budget: maximum 8 tool calls and total active execution of 180 seconds. It makes zero provider requests. Enforce limits in code. One active run per dataset/version/prompt configuration; repeated requests return its ID. Start analysis explicitly with `Generate insights` rather than on every upload/open.
+Initial per-run budget: maximum 8 tool calls and 180 seconds of active execution. Enforce limits in code. One active run per dataset/version/prompt configuration; repeated requests return its ID. Start analysis explicitly with `Generate insights`, not on upload/open.
 
 Findings contract: `id`, `type` (observation/hypothesis/data_quality), `title`, `explanation`, `metric_refs`, `source_refs`, `limitations`, `suggested_check`, `severity`. Bind displayed numeric values to validated metric records. Validate source IDs and dataset membership; schema validity alone does not prove the prose. Reject unsupported numerical claims and distinguish observed contributors from inferred causes. Do not claim a general numeric confidence score is calibrated.
 
@@ -171,7 +155,7 @@ Persist the job before returning HTTP 202. States: queued, running, waiting_revi
 
 Use an atomic Postgres lease with expiry and heartbeat to claim a run. Execute bounded background work while the web process is alive, checkpoint between graph nodes, and persist tool outputs before subsequent generation. This is resumable execution, not a guarantee that a sleeping free service runs unattended.
 
-The frontend polls an authenticated run-status endpoint with backoff. On restart, expired leases can be reclaimed through an explicit resume endpoint when the user returns. Guard against simultaneous resumptions. Persist completed tool outputs before later stages; record attempts and cap retries.
+The frontend polls authenticated run status with backoff. An explicit resume endpoint reclaims expired leases when the user returns; guard against simultaneous resumes. Record attempts and cap retries.
 
 Cancellation stops scheduling new nodes and discards late responses when appropriate. Membership and dataset ownership are rechecked on resume. Never auto-resume against a corrected/new dataset version. Prune expired checkpoint payloads under a documented retention policy while retaining final reports and compact audit metadata.
 
@@ -179,7 +163,7 @@ Cancellation stops scheduling new nodes and discards late responses when appropr
 
 The release uses deterministic, reviewed rules and bounded read-only tools. It must calculate totals from canonical records, preserve evidence, and abstain when the data is incomplete or ambiguous.
 
-Jev and all external model providers are excluded. No provider keys, adapters, quotas, price checks, or model-specific fallback logic belong in this release. A future proposal must define the decision it improves, a benchmark over reviewed data, privacy handling, latency, error states, and a budget before it is implemented.
+Jev and all external model providers are excluded. No provider keys, adapters, quotas, price checks, or model-specific fallback logic belong in this release. Any future provider needs a separate spec defining the decision it improves, a benchmark on sanitized fixtures, privacy handling, latency, error states, and a budget.
 
 ## 11. API contract outline
 
@@ -216,10 +200,9 @@ Common errors: code, safe message, retryable flag, request ID. Do not expose SQL
 
 1. A: navigation feedback, auth profiling, history pagination; release independently.
 2. B: Python health/auth/OpenAPI service deployed; verify cold-start behavior and DB/checkpoint connection compatibility.
-3. C: server import, review, canonical ledger, deterministic tools; compare against reviewed workbook totals before switching imports.
-4. D: deterministic LangGraph report, durable run recovery, evidence UI.
+3. C: server import, review, canonical ledger; compare against reviewed workbook totals before switching imports.
+4. D: deterministic tools and LangGraph report, durable run recovery, evidence UI.
 5. Conversational analysis using the same tested tools.
-6. Re-spec and benchmark any future external-model proposal separately.
 
 Deliver Docker and Render deployment configuration, `.env.example` without secrets, local setup instructions, migrations, backup/restore steps, generated TypeScript contracts, and evaluation commands. Configure frontend origin, backend URL, Supabase project/JWKS details, restricted database URL, and Storage settings through environment settings.
 

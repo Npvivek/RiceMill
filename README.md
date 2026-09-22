@@ -5,7 +5,7 @@
 - **Current dashboard:** analyzes `.xlsx` workbooks in the browser. Original files stay on the device; saved reports use Supabase Postgres with Row Level Security.
 - **v2 API:** Python/FastAPI on Render validates Supabase JWTs, scopes access through `workspace_members` and the restricted `mill_runtime` role, and contains a deterministic LangGraph shell. It does not yet power workbook imports or call an external model.
 
-See [tasks](tasks/rice-mill-v2.md) for release status, [business context](docs/business-context.md) for historical domain notes, and the unchanged [implementation spec](specs/ai-backend-and-dashboard.md) for the roadmap.
+See the [documentation index](tasks/README.md) for read order and current status; [business context](docs/business-context.md) holds historical domain notes.
 
 ## Frontend
 
@@ -16,11 +16,11 @@ test -f .env.local || cp .env.example .env.local
 npm run dev
 ```
 
-Set the Supabase URL and publishable key in `frontend/.env.local`. Next.js embeds `NEXT_PUBLIC_*` values at build time; set them in Vercel before deployment. `NEXT_PUBLIC_V2_API_URL` is optional until the frontend calls the v2 API. Add local and production `/auth/callback` URLs to Supabase Authentication redirects.
+Set the Supabase URL and publishable key in `frontend/.env.local` and Vercel; Next.js embeds `NEXT_PUBLIC_*` values at build time. `NEXT_PUBLIC_V2_API_URL` is optional until the frontend calls v2. Add local and production `/auth/callback` URLs to Supabase Auth redirects.
 
 ## Database and API
 
-Apply the Supabase SQL migrations in filename order. The first creates private reports; the later migrations add v2 workspace tables, the restricted runtime role, and membership RLS. Migrations are additive.
+Apply Supabase SQL migrations in filename order. They add private reports, v2 workspace tables, the restricted runtime role, and membership RLS.
 
 ```bash
 cd backend
@@ -30,7 +30,7 @@ test -f .env || cp .env.example .env
 .venv/bin/uvicorn app.main:app --reload
 ```
 
-Use the Supabase **session pooler on port 5432** for `RUNTIME_DATABASE_URL`. Store only the `mill_runtime` URL in Render. Keep the migration/admin URL out of the web service. `backend/requirements.txt` contains production packages; `requirements-dev.txt` adds test and lint tools. `render.yaml` defines the Docker service. The browser-only report flow runs without this API.
+Use the Supabase **session pooler on port 5432** for `RUNTIME_DATABASE_URL`. Give Render only the `mill_runtime` URL, never the migration/admin URL. `backend/requirements-dev.txt` adds checks to production dependencies; `render.yaml` defines the Docker service. Browser-only reports run without this API.
 
 ## Checks
 
@@ -45,6 +45,6 @@ npm run build
 npm run check:api
 ```
 
-`check:api` detects drift between FastAPI OpenAPI and generated TypeScript types. The opt-in live RLS test needs `TEST_MIGRATION_DATABASE_URL`, `TEST_RUNTIME_DATABASE_URL`, and `TEST_USER_A`; see [the handoff](tasks/rice-mill-v2.md) for live probe and restart evidence.
+`check:api` detects generated-type drift. The opt-in live RLS test needs `TEST_MIGRATION_DATABASE_URL`, `TEST_RUNTIME_DATABASE_URL`, and `TEST_USER_A`; see the [handoff](tasks/rice-mill-v2.md) for probe and restart evidence.
 
 `Data/` and `license/` are ignored private local folders. Some licence files remain in old Git history; removing them from the branch did not purge that history.
