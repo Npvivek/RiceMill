@@ -5,7 +5,7 @@ do $$ begin
     create role mill_runtime login nobypassrls nocreatedb nocreaterole noinherit;
   end if;
 end $$;
-alter role mill_runtime login nobypassrls nocreatedb nocreaterole noinherit nosuperuser;
+alter role mill_runtime login nobypassrls nocreatedb nocreaterole noinherit;
 grant usage on schema public to mill_runtime;
 grant usage on schema auth to mill_runtime;
 grant execute on function auth.uid() to mill_runtime;
