@@ -2,7 +2,7 @@
 
 **Source of truth:** [backend, dashboard, and AI implementation spec](../specs/ai-backend-and-dashboard.md)
 
-**Current branch:** `codex/ai-backend-foundation` at `19f150a`.
+**Implementation branch:** `codex/ai-backend-foundation` (until merged into `main`).
 
 ## Completed
 
