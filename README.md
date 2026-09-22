@@ -83,7 +83,7 @@ python -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --reload
 .venv/bin/ruff check app/v2 tests
-.venv/bin/mypy --follow-imports=silent --ignore-missing-imports --exclude 'app/v2/ai/graph.py' app/v2 scripts/export_openapi.py
+.venv/bin/mypy --follow-imports=silent --ignore-missing-imports app/v2 scripts/export_openapi.py
 .venv/bin/pytest -q
 cd .. && ./scripts/check-api-contract.sh
 ```
