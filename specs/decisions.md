@@ -77,3 +77,45 @@ Reason: Python 3.12 and 3.14 give those HTTP codes different default phrases, so
 Alternatives considered:
 - Generate only with the CI Python version: rejected because local checks would still drift under the developer runtime.
 - Ignore descriptions in the drift check: rejected because it would weaken the full-schema comparison.
+
+## 2026-09-24 — Deterministic analysis tool boundary
+Decision: Seven read-only tools accept a committed version and validated bounded parameters, then load only membership-scoped canonical rows; Decimal arithmetic and evidence IDs stay in structured results.
+Reason: The graph can select calculations but cannot issue arbitrary SQL or mutate the ledger. A 10,000-transaction ceiling and bounded result pages make compute and output predictable.
+Alternatives considered:
+- Pass raw SQL into tools: rejected because it bypasses reviewable tool bounds and workspace scoping.
+- Analyze browser workbook state: rejected because committed canonical records are the authoritative input.
+
+## 2026-09-24 — Bounded analysis state and recovery
+Decision: Run the four existing LangGraph nodes with at most two investigation rounds, eight tool calls, and 180 active seconds; persist stage checkpoints and tool outputs between node executions. Repeating create for the same version reclaims an expired run lease and resumes from the last valid checkpoint.
+Reason: The requested four-route API excludes the spec's separate resume endpoint. Reusing POST preserves the unique run constraint and gives a sleeping Render service an explicit, authenticated wake-up path. One stage per transaction keeps checkpoints durable across process death.
+Alternatives considered:
+- Add a fifth resume route: rejected because the D request explicitly allows only four routes.
+- Run the entire graph under one database transaction: rejected because a process death would discard every checkpoint and tool result.
+
+## 2026-09-24 — Evidence-backed findings and abstention
+Decision: Findings are deterministic templates carrying tool-result UUID metric_refs and transaction UUID source_refs. Validation rejects dangling or cross-version references and unsupported numeric text; ambiguous or insufficient data produces a data-quality limitation or no finding rather than a guessed cause.
+Reason: Schema-valid prose is not evidence. Cash-flow totals must not be labelled profit, and zero-baseline changes remain undefined.
+Alternatives considered:
+- Save unverified draft findings: rejected because readers could mistake unsupported claims for confirmed analysis.
+- Assign numeric confidence: rejected because no calibrated model or evaluation supports it.
+
+## 2026-09-24 — Evidence navigation within paginated imports
+Decision: Add an optional transaction focus parameter to the existing import-detail read so the server selects the correct ledger page; render findings on that same page and scroll to the transaction ID.
+Reason: The D API allows no new transaction endpoint, while a source reference may be on any page. Server-side rank lookup avoids client-side scans and preserves the existing import flow when focus is omitted.
+Alternatives considered:
+- Fetch every import page in the browser: rejected because large workbooks would cause unbounded network work.
+- Add a fifth route: rejected because the D request explicitly limits new routes.
+
+## 2026-09-24 — Checkpoint retention and partial runs
+Decision: Keep terminal reports and tool-result audit rows, but delete checkpoints for terminal runs 30 days after completion during a later authorized create. A failure after a durable stage is marked partial; validation failure before a report is marked failed.
+Reason: Checkpoint payloads may contain workbook-derived data and need bounded retention. A partial status tells the user that some calculation finished but no complete validated report was published. Cleanup is workspace-scoped and never touches active runs.
+Alternatives considered:
+- Keep all checkpoint payloads forever: rejected because their data footprint grows without improving final reports.
+- Delete checkpoints at completion: rejected because recent restart/debug evidence would disappear immediately.
+
+## 2026-09-24 — Do not mislink excluded rows as transaction evidence
+Decision: A data-quality finding about excluded workbook rows is not emitted until the UI can link the excluded source row itself; the quality tool still reports the count, and cash-flow findings state the limitation. Emit data-quality findings only for conditions evidenced by linked included transactions.
+Reason: Pointing an excluded-row claim at an unrelated included transaction would pass ID validation but mislead the reader. This narrows the earlier evidence-backed-findings decision without changing its reference rule.
+Alternatives considered:
+- Link any included transaction to an excluded-row warning: rejected because the evidence does not support the claim.
+- Add a source-row detail endpoint now: rejected because D permits only four new routes.

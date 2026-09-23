@@ -2,7 +2,7 @@
 
 **Source of truth:** [implementation spec](../specs/ai-backend-and-dashboard.md).
 
-**Status:** Milestones A and B are deployed. [Milestone C PR #4](https://github.com/Npvivek/RiceMill/pull/4) merged into `main` as `90ef585` on 2026-09-24. Render deployed `dep-daq5gjvf3r2c73da9hk0`; Vercel Production is ready. The hosted import flow passed a synthetic upload, duplicate retry, and persisted read. The fixture was removed afterward. The pre-business-data gates below remain open.
+**Status:** Milestones A and B are deployed. [Milestone C PR #4](https://github.com/Npvivek/RiceMill/pull/4) merged into `main` as `90ef585` on 2026-09-24. Render deployed `dep-daq5gjvf3r2c73da9hk0`; Vercel Production is ready. The hosted import flow passed a synthetic upload, duplicate retry, and persisted read. The fixture was removed afterward. Milestone D code is locally validated but has not passed its deployment gate below. The pre-business-data gates remain open.
 
 ## Done
 
@@ -34,9 +34,13 @@
 
 ## Milestone D — deterministic analysis
 
-- [ ] Add bounded read-only tools against canonical datasets.
-- [ ] Persist runs, validated findings, evidence, progress, leases, retries, cancellation, and resumable checkpoints.
-- [ ] Complete deterministic LangGraph stages and frontend import/review/dataset/run/evidence views.
-- [ ] Test recovery, authorization, RLS, backup/restore, and analysis evaluation.
+- [x] Add seven bounded read-only tools against membership-scoped committed datasets, using Decimal money and capped results.
+- [x] Implement four deterministic LangGraph stages, structured evidence validation, persisted tool results/findings, leases, retries, cancellation, stage checkpoints, and 30-day terminal-checkpoint pruning.
+- [x] Add four authenticated run routes, generated API types, and the committed-import insights panel with transaction evidence navigation.
+- [x] Add synthetic tool, graph, recovery, and route tests; extend the opt-in live RLS test to runs, tool results, findings, and checkpoints. Local lint, type, test, build, and API-drift checks passed (52 tests passed; one live RLS test skipped without test DB credentials).
+- [ ] Apply [the additive D runtime-access migration](../supabase/migrations/202609240003_analysis_runtime_access.sql) in a reviewed deployment; run the opt-in two-workspace RLS test against an isolated database, then verify a real process restart and the hosted insights flow with synthetic data.
+- [ ] Complete the 20-question business evaluation and backup/restore drill before relying on findings for family decisions.
+
+**D deployment gate:** Code is local only; no migration was applied to a live database in this work. The live RLS test and hosted restart/evidence checks remain unverified. The requested four-route limit makes repeat POST on an expired run the explicit resume action; [the decision log](../specs/decisions.md#2026-09-24--bounded-analysis-state-and-recovery) records the tradeoff. `waiting_review` remains unused because strict C import rejects ambiguous workbooks, and this D release has no review action.
 
 **Deferred:** any external model provider, including OpenRouter and Jev, needs a separate spec, benchmark, privacy review, error design, and budget. Keep the browser-only reports live during v2 import work; never merge historical workbooks without review.
