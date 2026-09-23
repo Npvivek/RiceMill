@@ -70,3 +70,10 @@ Reason: A client-only page would render to signed-out visitors and rely on later
 Alternatives considered:
 - Check auth only in the client component: rejected because it shows the form before discovering a missing or expired session.
 - Duplicate `auth.getUser()` in a new server layout: rejected because the proxy already performs that verification.
+
+## 2026-09-24 — Stable OpenAPI error descriptions across Python versions
+Decision: Specify the import route's 413 and 422 response descriptions explicitly in FastAPI metadata.
+Reason: Python 3.12 and 3.14 give those HTTP codes different default phrases, so the generated schema drifted in CI although the response bodies matched. Explicit text keeps one contract under both runtimes.
+Alternatives considered:
+- Generate only with the CI Python version: rejected because local checks would still drift under the developer runtime.
+- Ignore descriptions in the drift check: rejected because it would weaken the full-schema comparison.
