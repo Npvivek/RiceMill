@@ -551,7 +551,7 @@
                 }
               }
             },
-            "description": "Content Too Large"
+            "description": "Workbook Too Large"
           },
           "422": {
             "content": {
@@ -561,7 +561,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Invalid Workbook"
           },
           "503": {
             "content": {

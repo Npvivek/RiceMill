@@ -405,7 +405,7 @@ export interface operations {
                     "application/json": components["schemas"]["ImportErrorResponse"];
                 };
             };
-            /** @description Content Too Large */
+            /** @description Workbook Too Large */
             413: {
                 headers: {
                     [name: string]: unknown;
@@ -414,7 +414,7 @@ export interface operations {
                     "application/json": components["schemas"]["ImportErrorResponse"];
                 };
             };
-            /** @description Unprocessable Content */
+            /** @description Invalid Workbook */
             422: {
                 headers: {
                     [name: string]: unknown;

@@ -101,7 +101,8 @@ def get_import_service(settings: Settings = Depends(get_settings)) -> ImportServ
 
 @router.post("/imports", response_model=ImportSummaryResponse, status_code=201,
              responses={200: {"model": ImportSummaryResponse}, 403: {"model": ImportErrorResponse},
-                        413: {"model": ImportErrorResponse}, 422: {"model": ImportErrorResponse},
+                        413: {"model": ImportErrorResponse, "description": "Workbook Too Large"},
+                        422: {"model": ImportErrorResponse, "description": "Invalid Workbook"},
                         503: {"model": ImportErrorResponse}})
 def upload_import(
     response: Response,
