@@ -14,7 +14,7 @@ test -f .env.local || cp .env.example .env.local
 npm run dev
 ```
 
-Set the Supabase URL and publishable key in `frontend/.env.local` and Vercel; Next.js embeds `NEXT_PUBLIC_*` values at build time. `NEXT_PUBLIC_V2_API_URL` is optional until the frontend calls v2. Add local and production `/auth/callback` URLs to Supabase Auth redirects.
+Set the Supabase URL and publishable key in `frontend/.env.local` and Vercel; Next.js embeds `NEXT_PUBLIC_*` values at build time. Set `NEXT_PUBLIC_V2_API_URL` to enable the workspace view; browser-only reports work without it. Add local and production `/auth/callback` URLs to Supabase Auth redirects.
 
 ## Database and API
 

@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 from functools import lru_cache
+from json import JSONDecodeError
 from uuid import UUID
 
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jwt import InvalidTokenError, PyJWKClient
+from jwt import PyJWKClient, PyJWTError
+from jwt.exceptions import PyJWKClientConnectionError, PyJWKSetError
 
 from app.v2.config import Settings, get_settings
 
@@ -56,7 +58,12 @@ def get_current_user(
                 issuer=settings.issuer,
                 options={"require": ["exp", "sub", "aud", "iss"]},
             )
-    except InvalidTokenError as error:
+    except (PyJWKClientConnectionError, PyJWKSetError, JSONDecodeError) as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Verification keys are temporarily unavailable.",
+        ) from error
+    except PyJWTError as error:
         raise authentication_error() from error
 
     subject = claims.get("sub")

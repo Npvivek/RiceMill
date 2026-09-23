@@ -17,18 +17,18 @@ async function bearerToken(): Promise<string> {
 }
 
 export async function listV2Workspaces(): Promise<Workspace[]> {
-  const { data } = await api().GET("/v2/workspaces", {
+  const { data, error } = await api().GET("/v2/workspaces", {
     headers: { Authorization: `Bearer ${await bearerToken()}` },
   });
-  if (!data) throw new Error("Workspace request failed.");
+  if (error || !data) throw new Error("Workspace request failed.");
   return data;
 }
 
 export async function getV2Workspace(workspaceId: string): Promise<Workspace> {
-  const { data } = await api().GET("/v2/workspaces/{workspace_id}", {
+  const { data, error } = await api().GET("/v2/workspaces/{workspace_id}", {
     params: { path: { workspace_id: workspaceId } },
     headers: { Authorization: `Bearer ${await bearerToken()}` },
   });
-  if (!data) throw new Error("Workspace request failed.");
+  if (error || !data) throw new Error("Workspace request failed.");
   return data;
 }

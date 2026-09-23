@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   ShieldCheck,
+  Warehouse,
   Wheat,
 } from "lucide-react";
 import { logoutAction } from "@/app/auth/actions";
@@ -32,6 +33,7 @@ function NavContent({
   const pathname = usePathname();
   const analyzerActive = pathname === "/dashboard";
   const reportsActive = pathname.startsWith("/dashboard/reports");
+  const workspacesActive = pathname.startsWith("/dashboard/workspaces");
   const navItem = (active: boolean) =>
     `group flex h-10 items-center rounded-lg text-sm transition-colors ${
       collapsed ? "justify-center px-0" : "gap-3 px-3"
@@ -86,6 +88,19 @@ function NavContent({
           <Clock3 className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Saved reports</span>}
         </Link>
+        {process.env.NEXT_PUBLIC_V2_API_URL && (
+          <Link
+            href="/dashboard/workspaces"
+            onClick={onNavigate}
+            aria-current={workspacesActive ? "page" : undefined}
+            aria-label={collapsed ? "Workspaces" : undefined}
+            title={collapsed ? "Workspaces" : undefined}
+            className={navItem(workspacesActive)}
+          >
+            <Warehouse className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>Workspaces</span>}
+          </Link>
+        )}
         <Link
           href="/"
           onClick={onNavigate}
