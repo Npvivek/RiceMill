@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   ShieldCheck,
+  Upload,
   Warehouse,
   Wheat,
 } from "lucide-react";
@@ -34,6 +35,7 @@ function NavContent({
   const analyzerActive = pathname === "/dashboard";
   const reportsActive = pathname.startsWith("/dashboard/reports");
   const workspacesActive = pathname.startsWith("/dashboard/workspaces");
+  const importsActive = pathname.startsWith("/import");
   const navItem = (active: boolean) =>
     `group flex h-10 items-center rounded-lg text-sm transition-colors ${
       collapsed ? "justify-center px-0" : "gap-3 px-3"
@@ -88,6 +90,19 @@ function NavContent({
           <Clock3 className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Saved reports</span>}
         </Link>
+        {process.env.NEXT_PUBLIC_V2_API_URL && (
+          <Link
+            href="/import"
+            onClick={onNavigate}
+            aria-current={importsActive ? "page" : undefined}
+            aria-label={collapsed ? "Workbook imports" : undefined}
+            title={collapsed ? "Workbook imports" : undefined}
+            className={navItem(importsActive)}
+          >
+            <Upload className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>Workbook imports</span>}
+          </Link>
+        )}
         {process.env.NEXT_PUBLIC_V2_API_URL && (
           <Link
             href="/dashboard/workspaces"
