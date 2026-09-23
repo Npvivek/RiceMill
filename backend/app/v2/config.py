@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     app_environment: str = Field(default="development", validation_alias="APP_ENVIRONMENT")
     cors_origins_raw: str = Field(default="http://localhost:3000", validation_alias="CORS_ORIGINS")
     supabase_url: str = Field(default="", validation_alias="SUPABASE_URL")
+    supabase_publishable_key: str = Field(default="", validation_alias="SUPABASE_PUBLISHABLE_KEY", repr=False)
     supabase_jwks_url: str = Field(default="", validation_alias="SUPABASE_JWKS_URL")
     supabase_jwt_secret: str = Field(default="", validation_alias="SUPABASE_JWT_SECRET")
     supabase_jwt_audience: str = Field(default="authenticated", validation_alias="SUPABASE_JWT_AUDIENCE")

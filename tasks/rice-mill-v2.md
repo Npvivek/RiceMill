@@ -20,12 +20,15 @@
 - [ ] Test dashboard navigation across signed-in/out, expired-session, slow-network, and cold/warm paths. Collect at least 20 samples per relevant scenario before claiming a p95 target.
 - [ ] Recheck Render/Supabase limits and complete an export/restore drill.
 
-## Milestone C — canonical import
+## Milestone C — scoped import (local code complete; deployment pending)
 
-- [ ] Stage authenticated `.xlsx` uploads in private Storage; verify uploader, ownership, and file hash.
-- [ ] Parse safely; require review for ambiguous sheets, columns, dates, directions, totals, and exclusions.
-- [ ] Commit immutable, versioned datasets with `Decimal` reconciliation, source coordinates, mapping version, and idempotent same-hash imports.
-- [ ] Add paginated transactions, mapping corrections, and fixtures for refunds, stale formulas, Telugu/English descriptions, duplicate totals, invalid dates, and overlapping workbooks.
+- [x] Add authenticated `.xlsx` upload, server-recomputed hash, private Storage path, and same-hash idempotency.
+- [x] Parse deterministically with bounded ZIP/row limits and `Decimal` money; reject ambiguity or invalid transaction fields. Keep source coordinates and excluded-row reasons.
+- [x] Commit one dataset version, source rows, transactions, and final import status atomically; expose paginated import and transaction reads through `/v2/imports` and `/import`.
+- [x] Add synthetic tests for refunds, formula cells, Telugu/English text, duplicate totals, invalid dates, overlapping workbooks, idempotency, rollback, and the three routes.
+- [ ] Apply the additive C runtime-access migration and configure Storage upload on the hosted backend. Verify upload → parse → view with synthetic data before family workbooks.
+
+**Scope decision:** [Simplified C](../specs/decisions.md#2026-09-24--simplified-milestone-c-import) supersedes the earlier composite-FK plan for this milestone. Composite FKs, `mapping_rules`, review workflows, and stale-output markers are deferred indefinitely. Ambiguous workbooks fail with a clear error; they are never partially committed. Existing browser reports remain live.
 
 ## Milestone D — deterministic analysis
 

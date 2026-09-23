@@ -8,7 +8,9 @@ export async function refreshSupabaseSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   if (!url || !publishableKey) {
-    if (pathname.startsWith("/dashboard")) return NextResponse.redirect(new URL("/login", request.url));
+    if (pathname.startsWith("/dashboard") || pathname === "/import") {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
     return NextResponse.next({ request });
   }
 
@@ -47,7 +49,7 @@ export async function refreshSupabaseSession(request: NextRequest) {
     return response;
   }
 
-  if (pathname.startsWith("/dashboard") && !user) {
+  if ((pathname.startsWith("/dashboard") || pathname === "/import") && !user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return finalize(NextResponse.redirect(loginUrl));
