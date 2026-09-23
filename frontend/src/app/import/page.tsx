@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, FileSpreadsheet, LoaderCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { InsightsPanel } from "./insights-panel";
 import {
   getV2Import, listV2Imports, uploadV2Import,
   type ImportDetail, type ImportPage,
@@ -55,12 +56,17 @@ export default function ImportPage() {
     };
   }, [loadList]);
 
-  async function showDetail(importId: string, page = 1) {
+  async function showDetail(importId: string, page = 1, focusTransactionId?: string) {
     setDetailLoading(true);
     setDetailError("");
     try {
-      setDetail(await getV2Import(importId, page));
-      setDetailPage(page);
+      const record = await getV2Import(importId, page, 50, focusTransactionId);
+      setDetail(record);
+      setDetailPage(record.page);
+      if (focusTransactionId) {
+        window.setTimeout(() => document.getElementById(`transaction-${focusTransactionId}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" }), 0);
+      }
     } catch (error) {
       setDetailError(errorMessage(error));
     } finally {
@@ -180,9 +186,12 @@ export default function ImportPage() {
                 <p className="rounded-lg bg-emerald-50 p-3 text-sm dark:bg-emerald-950/30">Income <strong className="block text-lg">{money(detail.import_record.income_total)}</strong></p>
                 <p className="rounded-lg bg-rose-50 p-3 text-sm dark:bg-rose-950/30">Expense <strong className="block text-lg">{money(detail.import_record.expense_total)}</strong></p>
               </div>
+              {detail.dataset_version_id && detail.import_record.status === "committed" &&
+                <InsightsPanel key={detail.dataset_version_id} versionId={detail.dataset_version_id}
+                  onEvidenceClick={(id) => showDetail(detail.import_record.id, 1, id)} />}
               {detail.transactions.length > 0 && <div className="overflow-x-auto"><table className="w-full min-w-[600px] text-left text-sm">
                 <thead><tr className="border-b border-stone-300 dark:border-stone-700"><th className="py-2">Date</th><th>Description</th><th>Direction</th><th>Amount</th><th>Source</th></tr></thead>
-                <tbody>{detail.transactions.map((row) => <tr key={row.id} className="border-b border-stone-200 dark:border-stone-800">
+                <tbody>{detail.transactions.map((row) => <tr key={row.id} id={`transaction-${row.id}`} className="scroll-mt-20 border-b border-stone-200 dark:border-stone-800 target:bg-amber-100">
                   <td className="py-2">{row.transaction_date}</td><td>{row.description}</td><td className="capitalize">{row.direction}</td><td>{money(row.amount)}</td><td>{row.source_sheet}:{row.source_row}</td>
                 </tr>)}</tbody>
               </table></div>}

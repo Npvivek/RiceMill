@@ -6,6 +6,8 @@ export type Workspace = components["schemas"]["WorkspaceResponse"];
 export type ImportSummary = components["schemas"]["ImportSummaryResponse"];
 export type ImportPage = components["schemas"]["ImportPageResponse"];
 export type ImportDetail = components["schemas"]["ImportDetailResponse"];
+export type AnalysisRun = components["schemas"]["AnalysisRunResponse"];
+export type AnalysisRunPage = components["schemas"]["AnalysisRunPageResponse"];
 type ImportError = components["schemas"]["ImportErrorResponse"];
 
 function api() {
@@ -53,12 +55,50 @@ export async function listV2Imports(page = 1, pageSize = 20): Promise<ImportPage
   return data;
 }
 
-export async function getV2Import(importId: string, page = 1, pageSize = 50): Promise<ImportDetail> {
+export async function getV2Import(importId: string, page = 1, pageSize = 50,
+  focusTransactionId?: string): Promise<ImportDetail> {
   const { data, error } = await api().GET("/v2/imports/{import_id}", {
-    params: { path: { import_id: importId }, query: { page, page_size: pageSize } },
+    params: { path: { import_id: importId }, query: { page, page_size: pageSize,
+      focus_transaction_id: focusTransactionId } },
     headers: { Authorization: `Bearer ${await bearerToken()}` },
   });
   if (error || !data) throw new Error(messageFromError(error, "Import details are unavailable."));
+  return data;
+}
+
+export async function createV2AnalysisRun(versionId: string): Promise<AnalysisRun> {
+  const { data, error } = await api().POST("/v2/datasets/{version_id}/analysis-runs", {
+    params: { path: { version_id: versionId } },
+    headers: { Authorization: `Bearer ${await bearerToken()}` },
+  });
+  if (error || !data) throw new Error(messageFromError(error, "Could not start analysis."));
+  return data;
+}
+
+export async function getV2AnalysisRun(runId: string): Promise<AnalysisRun> {
+  const { data, error } = await api().GET("/v2/analysis-runs/{run_id}", {
+    params: { path: { run_id: runId } },
+    headers: { Authorization: `Bearer ${await bearerToken()}` },
+  });
+  if (error || !data) throw new Error(messageFromError(error, "Could not load analysis."));
+  return data;
+}
+
+export async function listV2AnalysisRuns(versionId: string): Promise<AnalysisRunPage> {
+  const { data, error } = await api().GET("/v2/analysis-runs", {
+    params: { query: { dataset_version_id: versionId, page: 1, page_size: 20 } },
+    headers: { Authorization: `Bearer ${await bearerToken()}` },
+  });
+  if (error || !data) throw new Error(messageFromError(error, "Could not load insights."));
+  return data;
+}
+
+export async function cancelV2AnalysisRun(runId: string): Promise<AnalysisRun> {
+  const { data, error } = await api().POST("/v2/analysis-runs/{run_id}/cancel", {
+    params: { path: { run_id: runId } },
+    headers: { Authorization: `Bearer ${await bearerToken()}` },
+  });
+  if (error || !data) throw new Error(messageFromError(error, "Could not cancel analysis."));
   return data;
 }
 
