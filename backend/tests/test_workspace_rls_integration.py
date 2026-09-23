@@ -61,6 +61,17 @@ def test_restricted_role_rls_isolates_workspaces_and_checkpoints() -> None:
                 insert into public.graph_checkpoints (id, analysis_run_id, checkpoint_key, state)
                 values (:id, :run_id, :key, '{"stage":"foreign"}'::jsonb)
             """), {"id": foreign_checkpoint_id, "run_id": runs[1], "key": str(foreign_checkpoint_id)})
+            for run_id in runs:
+                connection.execute(text("""
+                    insert into public.tool_results (analysis_run_id, tool_name, input, result)
+                    values (:run_id, 'get_data_quality', '{}'::jsonb, '{}'::jsonb)
+                """), {"run_id": run_id})
+                connection.execute(text("""
+                    insert into public.findings (analysis_run_id, finding_type, severity, title,
+                        explanation, metric_refs, source_refs, limitations)
+                    values (:run_id, 'data_quality', 'info', 'synthetic', 'synthetic',
+                        '[]'::jsonb, '[]'::jsonb, 'synthetic')
+                """), {"run_id": run_id})
 
         with runtime.connect() as connection:
             assert connection.execute(text("select current_user")).scalar_one() == "mill_runtime"
@@ -73,8 +84,14 @@ def test_restricted_role_rls_isolates_workspaces_and_checkpoints() -> None:
             assert visible == [spaces[0]]
             assert session.execute(text("select id from public.analysis_runs where id = :id"),
                                    {"id": runs[1]}).scalar_one_or_none() is None
+            assert session.execute(text("""
+                update public.analysis_runs set status = 'cancelled' where id = :id returning id
+            """), {"id": runs[1]}).scalar_one_or_none() is None
             assert session.execute(text("select count(*) from public.graph_checkpoints where analysis_run_id = :id"),
                                    {"id": runs[1]}).scalar_one() == 0
+            for table in ("tool_results", "findings"):
+                assert session.execute(text(f"select count(*) from public.{table} where analysis_run_id = :id"),
+                                       {"id": runs[1]}).scalar_one() == 0
             own = put_checkpoint(session, access, runs[0], {"stage": "test"})
             assert get_checkpoint(session, access, runs[0], own.id) is not None
             with pytest.raises(HTTPException) as denied:
@@ -104,6 +121,25 @@ def test_restricted_role_rls_isolates_workspaces_and_checkpoints() -> None:
                 insert into public.graph_checkpoints (analysis_run_id, checkpoint_key, state)
                 values (:run_id, :key, '{}'::jsonb)
             """), {"run_id": runs[1], "key": str(uuid4())})
+
+        for table, columns, values in (
+            ("tool_results", "tool_name, input, result", "'get_data_quality', '{}'::jsonb, '{}'::jsonb"),
+            ("findings", "finding_type, severity, title, explanation, metric_refs, source_refs, limitations",
+             "'data_quality', 'info', 'synthetic', 'synthetic', '[]'::jsonb, '[]'::jsonb, 'synthetic'"),
+        ):
+            with pytest.raises(SQLAlchemyError), Session(runtime) as session, session.begin():
+                session.execute(text("select set_config('request.jwt.claim.sub', :subject, true)"),
+                                {"subject": str(user_a)})
+                session.execute(text(f"insert into public.{table} (analysis_run_id, {columns}) "
+                                     f"values (:run_id, {values})"), {"run_id": runs[1]})
+        with pytest.raises(SQLAlchemyError), Session(runtime) as session, session.begin():
+            session.execute(text("select set_config('request.jwt.claim.sub', :subject, true)"),
+                            {"subject": str(user_a)})
+            session.execute(text("""
+                insert into public.analysis_runs (workspace_id, dataset_version_id, requested_by,
+                    graph_version, prompt_version, model_id, status)
+                values (:workspace, :version, :user, 'rls-write', 'rls-write', 'deterministic', 'queued')
+            """), {"workspace": spaces[1], "version": versions[1], "user": user_a})
 
         with Session(runtime) as session, session.begin():
             # A returned pooled connection has no previous request's claim.
