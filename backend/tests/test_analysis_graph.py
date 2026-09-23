@@ -52,3 +52,16 @@ def test_call_round_and_deadline_budgets_enforced():
     base["deadline"] = (datetime.now(UTC) - timedelta(seconds=1)).isoformat()
     with pytest.raises(TimeoutError):
         nodes.assess_quality(base)
+
+
+def test_numeric_prose_is_rejected_even_with_valid_references():
+    source = row(1, "income", "100.00")
+    nodes = DeterministicNodes(AnalysisTools(SeededReader([source]), USER))
+    base = state()
+    metric_id = str(uuid4())
+    base["tool_calls"] = [{"id": metric_id}]
+    base["findings"] = [{"type": "observation", "severity": "info", "title": "Sales",
+                         "explanation": "Income rose by 50 percent.", "metric_refs": [metric_id],
+                         "source_refs": [str(source.id)], "limitations": "Synthetic"}]
+    with pytest.raises(AnalysisInputError, match="numeric"):
+        nodes.validate_findings(base)

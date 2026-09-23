@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any, Literal, TypedDict
@@ -162,5 +163,9 @@ class DeterministicNodes:
             if (not set(finding.metric_refs).issubset(valid_metrics)
                     or not set(finding.source_refs).issubset(valid_sources)):
                 raise AnalysisInputError("Finding has an unresolved metric or source reference.")
+            prose = " ".join(filter(None, (finding.title, finding.explanation,
+                                            finding.limitations, finding.suggested_check)))
+            if re.search(r"\d", prose):
+                raise AnalysisInputError("Finding prose contains an unsupported numeric claim.")
             validated.append(finding.model_dump())
         return {"findings": validated}
