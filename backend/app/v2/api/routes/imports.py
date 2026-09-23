@@ -51,6 +51,7 @@ class TransactionResponse(BaseModel):
 
 class ImportDetailResponse(BaseModel):
     import_record: ImportSummaryResponse
+    dataset_version_id: UUID | None
     transactions: list[TransactionResponse]
     page: int
     page_size: int
@@ -149,14 +150,19 @@ def get_import(
     import_id: UUID,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=50, ge=1, le=100),
+    focus_transaction_id: UUID | None = Query(default=None),
     user: AuthenticatedUser = Depends(get_current_user),
     service: ImportService = Depends(get_import_service),
 ) -> ImportDetailResponse | JSONResponse:
     try:
-        result: ImportDetail = service.get_import(UUID(user.id), import_id, page, page_size)
+        if focus_transaction_id is None:
+            result: ImportDetail = service.get_import(UUID(user.id), import_id, page, page_size)
+        else:
+            result = service.get_import(UUID(user.id), import_id, page, page_size, focus_transaction_id)
     except ImportFailure as error:
         return _failure(error)
     return ImportDetailResponse(
         import_record=_summary(result.result), transactions=[_transaction(item) for item in result.transactions],
         page=result.page, page_size=result.page_size, total=result.total,
+        dataset_version_id=result.dataset_version_id,
     )

@@ -46,7 +46,8 @@ class ImportRepository(Protocol):
     def list(self, user_id: UUID, page: int, page_size: int) -> ImportPage:
         """Return only the derived workspace's imports."""
 
-    def detail(self, user_id: UUID, import_id: UUID, page: int, page_size: int) -> ImportDetail:
+    def detail(self, user_id: UUID, import_id: UUID, page: int, page_size: int,
+               focus_transaction_id: UUID | None = None) -> ImportDetail:
         """Return a scoped import and one transaction page or raise 404."""
 
 
@@ -249,10 +250,29 @@ class PostgresImportRepository:
             return ImportPage(tuple(self._summary(session, workspace_id, item) for item in ids),
                               page, page_size, total)
 
-    def detail(self, user_id: UUID, import_id: UUID, page: int, page_size: int) -> ImportDetail:
+    def detail(self, user_id: UUID, import_id: UUID, page: int, page_size: int,
+               focus_transaction_id: UUID | None = None) -> ImportDetail:
         with self._session(user_id) as session:
             workspace_id = self._workspace_id(session, user_id)
             summary = self._summary(session, workspace_id, import_id)
+            version_id = session.execute(text("""
+                select id from public.dataset_versions where import_id = :import_id
+                  and workspace_id = :workspace_id and status = 'committed'
+                order by version_number desc limit 1
+            """), {"import_id": import_id, "workspace_id": workspace_id}).scalar_one_or_none()
+            if focus_transaction_id is not None:
+                offset = session.execute(text("""
+                    select position from (
+                      select t.id, row_number() over (order by t.transaction_date desc, t.id desc) - 1 as position
+                      from public.transactions t
+                      join public.dataset_versions v on v.id = t.dataset_version_id
+                      where v.import_id = :import_id and t.workspace_id = :workspace_id
+                    ) ranked where id = :focus_id
+                """), {"import_id": import_id, "workspace_id": workspace_id,
+                       "focus_id": focus_transaction_id}).scalar_one_or_none()
+                if offset is None:
+                    raise ImportFailure("transaction_not_found", "Source transaction not found in this import.", 404)
+                page = int(offset) // page_size + 1
             rows = session.execute(text("""
                 select t.id, s.sheet_name, s.row_number, t.transaction_date, t.description,
                        t.direction, t.amount, t.category
@@ -269,7 +289,7 @@ class PostgresImportRepository:
                 direction=cast(Direction, row["direction"]), amount=Decimal(row["amount"]),
                 category=row["category"],
             ) for row in rows)
-            return ImportDetail(summary, transactions, page, page_size, summary.transaction_count)
+            return ImportDetail(summary, transactions, page, page_size, summary.transaction_count, version_id)
 
 
 class ImportService:
@@ -324,9 +344,12 @@ class ImportService:
         except SQLAlchemyError as error:
             raise ImportFailure("database_unavailable", "The import database is unavailable.", 503, True) from error
 
-    def get_import(self, user_id: UUID, import_id: UUID, page: int, page_size: int) -> ImportDetail:
+    def get_import(self, user_id: UUID, import_id: UUID, page: int, page_size: int,
+                   focus_transaction_id: UUID | None = None) -> ImportDetail:
         """Read one import and one transaction page, hiding foreign IDs as 404."""
         try:
-            return self._repository.detail(user_id, import_id, page, page_size)
+            if focus_transaction_id is None:
+                return self._repository.detail(user_id, import_id, page, page_size)
+            return self._repository.detail(user_id, import_id, page, page_size, focus_transaction_id)
         except SQLAlchemyError as error:
             raise ImportFailure("database_unavailable", "The import database is unavailable.", 503, True) from error
