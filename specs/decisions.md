@@ -119,3 +119,11 @@ Reason: Pointing an excluded-row claim at an unrelated included transaction woul
 Alternatives considered:
 - Link any included transaction to an excluded-row warning: rejected because the evidence does not support the claim.
 - Add a source-row detail endpoint now: rejected because D permits only four new routes.
+
+## 2026-09-24 — Apply deterministic analysis runtime access
+Decision: Apply `202609240003_analysis_runtime_access.sql` in the live Supabase SQL Editor, as with the C runtime migration, after auditing `mill_runtime` privileges and policies.
+Reason: Render already serves the merged D code, but its restricted role lacked the grants and RLS policies needed to persist and read analysis. The migration adds only the reviewed permissions and seven guarded policies; the request path still uses `mill_runtime`.
+Rollback: Drop those seven D policies and revoke INSERT/UPDATE on `analysis_runs`, SELECT/INSERT on `tool_results` and `findings`, and DELETE on `graph_checkpoints`. Preserve earlier SELECT on `analysis_runs` and checkpoint read/write grants.
+Alternatives considered:
+- Use migration credentials in Render: rejected because privileged credentials do not belong in the request service.
+- Grant broad table access without RLS: rejected because direct SQL must remain workspace-scoped.
