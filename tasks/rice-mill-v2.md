@@ -45,7 +45,8 @@
 - [x] Observe the import page's delayed-backend state after inactivity: it displayed “The server is taking longer than usual” after eight seconds. Render logs showed a new process at 17:00:29 IST; the duplicate import and persisted insights loaded afterward.
 - [x] Remove both synthetic workbooks and linked database fixtures. Supabase confirmed deletion of two storage objects; the fixture-only SQL cleanup succeeded. A read-only audit returned zero matching imports, dataset versions, analysis runs, and storage objects. Dependent findings, tool results, and checkpoints cascade with their runs.
 - [ ] Run the opt-in two-workspace D RLS test against an isolated database. Separate test credentials were not provided; do not run it against the live project.
-- [ ] Complete the 20-question business evaluation and backup/restore drill before relying on findings for family decisions.
+- [ ] Complete the spec's 20-question business evaluation. No reviewed business-question set with expected arithmetic, references, and explanation judgments was found in the repo; human review is still needed before relying on findings.
+- [ ] Complete an export/restore drill. No isolated restore target was provided; do not restore into the live project.
 
 **D deployment gate:** Production code, runtime permissions, synthetic insights, evidence linkage, cancellation, process restart, cold wake, and fixture cleanup have been observed. The isolated RLS test, 20-question human review, and backup/restore drill remain open. The requested four-route limit makes repeat POST on an expired run the explicit resume action; [the decision log](../specs/decisions.md#2026-09-24--bounded-analysis-state-and-recovery) records the tradeoff. `waiting_review` remains unused because strict C import rejects ambiguous workbooks, and this D release has no review action.
 
