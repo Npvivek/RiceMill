@@ -8,6 +8,7 @@ export type ImportPage = components["schemas"]["ImportPageResponse"];
 export type ImportDetail = components["schemas"]["ImportDetailResponse"];
 export type AnalysisRun = components["schemas"]["AnalysisRunResponse"];
 export type AnalysisRunPage = components["schemas"]["AnalysisRunPageResponse"];
+export type Conversation = components["schemas"]["ConversationResponse"];
 type ImportError = components["schemas"]["ImportErrorResponse"];
 
 function api() {
@@ -99,6 +100,33 @@ export async function cancelV2AnalysisRun(runId: string): Promise<AnalysisRun> {
     headers: { Authorization: `Bearer ${await bearerToken()}` },
   });
   if (error || !data) throw new Error(messageFromError(error, "Could not cancel analysis."));
+  return data;
+}
+
+export async function createV2Conversation(versionId: string, mode: "chat" | "anomalies"): Promise<Conversation> {
+  const { data, error } = await api().POST("/v2/conversations", {
+    body: { dataset_version_id: versionId, mode },
+    headers: { Authorization: `Bearer ${await bearerToken()}` },
+  });
+  if (error || !data) throw new Error(messageFromError(error, "Could not start the assistant."));
+  return data;
+}
+
+export async function getV2Conversation(threadId: string): Promise<Conversation> {
+  const { data, error } = await api().GET("/v2/conversations/{thread_id}", {
+    params: { path: { thread_id: threadId } },
+    headers: { Authorization: `Bearer ${await bearerToken()}` },
+  });
+  if (error || !data) throw new Error(messageFromError(error, "Could not load this conversation."));
+  return data;
+}
+
+export async function sendV2Message(threadId: string, content: string): Promise<Conversation> {
+  const { data, error } = await api().POST("/v2/conversations/{thread_id}/messages", {
+    params: { path: { thread_id: threadId } }, body: { content },
+    headers: { Authorization: `Bearer ${await bearerToken()}` },
+  });
+  if (error || !data) throw new Error(messageFromError(error, "Could not send the message."));
   return data;
 }
 

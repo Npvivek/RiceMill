@@ -23,3 +23,5 @@ services:
         value: authenticated
       - key: RUNTIME_DATABASE_URL
         sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false

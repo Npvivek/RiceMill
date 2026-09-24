@@ -6,6 +6,7 @@ import { ArrowLeft, FileSpreadsheet, LoaderCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { InsightsPanel } from "./insights-panel";
+import { AiAssistant } from "./ai-assistant";
 import {
   getV2Import, listV2Imports, uploadV2Import,
   type ImportDetail, type ImportPage,
@@ -187,8 +188,10 @@ export default function ImportPage() {
                 <p className="rounded-lg bg-rose-50 p-3 text-sm dark:bg-rose-950/30">Expense <strong className="block text-lg">{money(detail.import_record.expense_total)}</strong></p>
               </div>
               {detail.dataset_version_id && detail.import_record.status === "committed" &&
-                <InsightsPanel key={detail.dataset_version_id} versionId={detail.dataset_version_id}
-                  onEvidenceClick={(id) => showDetail(detail.import_record.id, 1, id)} />}
+                <><InsightsPanel key={`insights:${detail.dataset_version_id}`} versionId={detail.dataset_version_id}
+                  onEvidenceClick={(id) => showDetail(detail.import_record.id, 1, id)} />
+                  <AiAssistant key={`ai:${detail.dataset_version_id}`} versionId={detail.dataset_version_id}
+                    onEvidenceClick={(id) => showDetail(detail.import_record.id, 1, id)} /></>}
               {detail.transactions.length > 0 && <div className="overflow-x-auto"><table className="w-full min-w-[600px] text-left text-sm">
                 <thead><tr className="border-b border-stone-300 dark:border-stone-700"><th className="py-2">Date</th><th>Description</th><th>Direction</th><th>Amount</th><th>Source</th></tr></thead>
                 <tbody>{detail.transactions.map((row) => <tr key={row.id} id={`transaction-${row.id}`} className="scroll-mt-20 border-b border-stone-200 dark:border-stone-800 target:bg-amber-100">
