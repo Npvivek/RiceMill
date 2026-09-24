@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  BarChart3,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -32,7 +31,6 @@ function NavContent({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const analyzerActive = pathname === "/dashboard";
   const reportsActive = pathname.startsWith("/dashboard/reports");
   const workspacesActive = pathname.startsWith("/dashboard/workspaces");
   const importsActive = pathname.startsWith("/import");
@@ -69,40 +67,27 @@ function NavContent({
 
       <nav className={`flex-1 space-y-1 py-4 ${collapsed ? "px-2" : "px-3"}`} aria-label="Dashboard navigation">
         <Link
-          href="/dashboard"
+          href="/import"
           onClick={onNavigate}
-          aria-current={analyzerActive ? "page" : undefined}
-          aria-label={collapsed ? "Excel analysis" : undefined}
-          title={collapsed ? "Excel analysis" : undefined}
-          className={navItem(analyzerActive)}
+          aria-current={importsActive ? "page" : undefined}
+          aria-label={collapsed ? "Workbook imports" : undefined}
+          title={collapsed ? "Workbook imports" : undefined}
+          className={navItem(importsActive)}
         >
-          <BarChart3 className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>Excel analysis</span>}
+          <Upload className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Workbook imports</span>}
         </Link>
         <Link
           href="/dashboard/reports"
           onClick={onNavigate}
           aria-current={reportsActive ? "page" : undefined}
-          aria-label={collapsed ? "Saved reports" : undefined}
-          title={collapsed ? "Saved reports" : undefined}
+          aria-label={collapsed ? "Saved browser reports" : undefined}
+          title={collapsed ? "Saved browser reports" : undefined}
           className={navItem(reportsActive)}
         >
           <Clock3 className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>Saved reports</span>}
+          {!collapsed && <span>Saved browser reports</span>}
         </Link>
-        {process.env.NEXT_PUBLIC_V2_API_URL && (
-          <Link
-            href="/import"
-            onClick={onNavigate}
-            aria-current={importsActive ? "page" : undefined}
-            aria-label={collapsed ? "Workbook imports" : undefined}
-            title={collapsed ? "Workbook imports" : undefined}
-            className={navItem(importsActive)}
-          >
-            <Upload className="h-4 w-4 shrink-0" />
-            {!collapsed && <span>Workbook imports</span>}
-          </Link>
-        )}
         {process.env.NEXT_PUBLIC_V2_API_URL && (
           <Link
             href="/dashboard/workspaces"

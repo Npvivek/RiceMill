@@ -147,14 +147,14 @@ function SavedReports({
             <Database className="h-4 w-4" /> Report archive
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Saved reports</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Saved browser reports</h1>
             {!loading && !error && (
               <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
                 {count.format(reports.length)} {reports.length === 1 ? "report" : "reports"}
               </span>
             )}
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">Open, download, back up or remove your saved analyses.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Open or back up reports from the earlier browser analysis. New workbooks go through Workbook imports.</p>
         </div>
         {reports.length > 0 && (
           <Button variant="outline" size="sm" onClick={onExport} className="gap-2 self-start">
@@ -182,7 +182,7 @@ function SavedReports({
               <Clock3 className="h-5 w-5" />
             </div>
             <p className="mt-4 text-sm font-semibold text-foreground">No saved reports yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">Your first Excel analysis will be saved here automatically.</p>
+            <p className="mt-1 text-xs text-muted-foreground">New workbooks belong in Workbook imports.</p>
           </CardContent>
         ) : (
           <div className="divide-y divide-border">

@@ -56,7 +56,7 @@ export async function refreshSupabaseSession(request: NextRequest) {
   }
 
   if (pathname === "/login" && user) {
-    return finalize(NextResponse.redirect(new URL("/dashboard", request.url)));
+    return finalize(NextResponse.redirect(new URL("/import", request.url)));
   }
 
   return finalize(NextResponse.next({ request: { headers: requestHeaders } }));

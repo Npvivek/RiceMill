@@ -10,8 +10,8 @@ export type AuthActionState = {
 };
 
 function safeNext(value: FormDataEntryValue | null): string {
-  const next = typeof value === "string" ? value : "/dashboard";
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  const next = typeof value === "string" ? value : "/import";
+  return next.startsWith("/") && !next.startsWith("//") ? next : "/import";
 }
 
 async function siteUrl() {
@@ -89,7 +89,7 @@ export async function updatePasscodeAction(
     return { message: "The passcode could not be changed. Request a new reset email and try again." };
   }
 
-  redirect("/dashboard?passcode=updated");
+  redirect("/import?passcode=updated");
 }
 
 export async function logoutAction() {

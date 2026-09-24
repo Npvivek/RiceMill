@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 
 const initialState: AuthActionState = {};
 
-export function LoginForm({ next = "/dashboard", resetLinkError = false }: { next?: string; resetLinkError?: boolean }) {
+export function LoginForm({ next = "/import", resetLinkError = false }: { next?: string; resetLinkError?: boolean }) {
   const [state, action, pending] = useActionState(loginAction, initialState);
 
   return (
