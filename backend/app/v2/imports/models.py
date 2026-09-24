@@ -107,3 +107,4 @@ class ImportDetail:
     page: int
     page_size: int
     total: int
+    dataset_version_id: UUID | None = None

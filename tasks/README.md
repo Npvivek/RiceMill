@@ -3,7 +3,7 @@
 | File | Type | Status | Last updated | Description |
 |---|---|---|---|---|
 | [tasks/README.md](README.md) | index | active | 2026-09-24 | Index and read order for project documentation. |
-| [tasks/rice-mill-v2.md](rice-mill-v2.md) | handoff | active | 2026-09-24 | Completed work, open gates, and upcoming v2 milestones. |
+| [tasks/rice-mill-v2.md](rice-mill-v2.md) | handoff | active | 2026-09-24 | Deployed A-C work, locally validated D code, and open deployment gates. |
 | [tasks/rice-mill-v2-recon-2026-09-23.md](rice-mill-v2-recon-2026-09-23.md) | recon | snapshot | 2026-09-23 | Dated pre-C code and schema findings with a proposed build order. |
 | [specs/ai-backend-and-dashboard.md](../specs/ai-backend-and-dashboard.md) | spec | active | 2026-09-23 | Intended behavior and acceptance criteria for the dashboard and v2 backend. |
 | [specs/decisions.md](../specs/decisions.md) | decision | active | 2026-09-24 | Append-only record of settled implementation choices. |
