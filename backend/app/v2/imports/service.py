@@ -23,7 +23,7 @@ from app.v2.imports.models import (
 )
 from app.v2.imports.parser import MAX_COMPRESSED_BYTES, parse_workbook
 
-PARSER_VERSION = "c1"
+PARSER_VERSION = "c2"
 STORAGE_BUCKET = "mill-workbooks"
 
 
@@ -35,7 +35,7 @@ class StorageGateway(Protocol):
 class ImportRepository(Protocol):
     def reserve(self, user_id: UUID, file_name: str, file_hash: str, file_size: int,
                 upload: Callable[[str], None]) -> tuple[ImportResult, bool]:
-        """Reserve by unique hash and upload before committing; return existing on conflict."""
+        """Reserve by hash; retry a failed import in place for its original uploader."""
 
     def mark_failed(self, user_id: UUID, import_id: UUID, code: str, message: str) -> None:
         """Mark only this user's staged import failed."""
@@ -150,9 +150,21 @@ class PostgresImportRepository:
                 "storage_path": storage_path, "parser_version": PARSER_VERSION,
             }).scalar_one_or_none()
             if inserted is None:
-                existing_id = session.execute(text("""
-                    select id from public.imports where workspace_id = :workspace_id and file_hash = :file_hash
-                """), {"workspace_id": workspace_id, "file_hash": file_hash}).scalar_one()
+                existing = session.execute(text("""
+                    select id, status, uploaded_by from public.imports
+                    where workspace_id = :workspace_id and file_hash = :file_hash
+                """), {"workspace_id": workspace_id, "file_hash": file_hash}).mappings().one()
+                existing_id = cast(UUID, existing["id"])
+                if existing["status"] == "failed" and existing["uploaded_by"] == user_id:
+                    retried = session.execute(text("""
+                        update public.imports set status = 'staged', error_code = null,
+                          error_message = null, parser_version = :parser_version
+                        where id = :import_id and workspace_id = :workspace_id and status = 'failed'
+                          and uploaded_by = :user_id returning id
+                    """), {"import_id": existing_id, "workspace_id": workspace_id,
+                           "user_id": user_id, "parser_version": PARSER_VERSION}).scalar_one_or_none()
+                    if retried is not None:
+                        return self._summary(session, workspace_id, existing_id), False
                 return self._summary(session, workspace_id, existing_id), True
             # A rejected upload rolls this reservation back, allowing an identical retry.
             upload(storage_path)
@@ -299,7 +311,7 @@ class ImportService:
 
     def create_import(self, user_id: UUID, access_token: str, file_name: str, content: bytes,
                       proposed_hash: str | None = None) -> tuple[ImportResult, bool]:
-        """Store and parse one workbook; return the immutable same-hash import if present."""
+        """Store and parse once per hash, retrying the uploader's failed row in place."""
         safe_name = file_name.replace("\\", "/").rsplit("/", 1)[-1]
         if not safe_name.lower().endswith(".xlsx") or not 1 <= len(safe_name) <= 255:
             raise ImportFailure("unsupported_file", "Choose an .xlsx workbook.", 422)

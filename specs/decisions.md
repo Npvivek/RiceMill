@@ -127,3 +127,10 @@ Rollback: Drop those seven D policies and revoke INSERT/UPDATE on `analysis_runs
 Alternatives considered:
 - Use migration credentials in Render: rejected because privileged credentials do not belong in the request service.
 - Grant broad table access without RLS: rejected because direct SQL must remain workspace-scoped.
+
+## 2026-09-25 — Exclude malformed transaction rows without aborting valid imports
+Decision: Supersede strict all-or-fail parsing for row-level formatting errors: preserve each bad row and reason in `source_rows`, exclude it from transactions and totals, and commit the valid rows. Keep workbook-level mapping errors and workbooks with no valid transactions fatal. Let the original uploader retry a failed same-hash import in place.
+Reason: One malformed entry should not block the other usable transactions, and an earlier failed hash must not prevent retry after a parser fix. The import detail shows how many source rows were excluded, but the current UI does not expose each excluded row; users must compare the original workbook before relying on incomplete totals.
+Alternatives considered:
+- Reject the entire workbook for any bad row: rejected because one malformed entry prevented otherwise valid imports.
+- Guess missing values or use formula caches: rejected because this could introduce false transactions into the canonical ledger.

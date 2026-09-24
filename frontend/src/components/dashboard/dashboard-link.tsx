@@ -57,7 +57,7 @@ export function DashboardLink() {
 
   return (
     <Link
-      href="/dashboard"
+      href="/import"
       aria-busy={requested || undefined}
       className={cn(
         buttonVariants({ variant: "outline", size: "sm" }),

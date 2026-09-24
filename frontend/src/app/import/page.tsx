@@ -121,13 +121,13 @@ export default function ImportPage() {
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-gray-950 dark:text-stone-100">
       <div className="mx-auto max-w-5xl space-y-6">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-amber-800 hover:underline dark:text-amber-300">
-          <ArrowLeft className="h-4 w-4" /> Back to dashboard
+        <Link href="/dashboard/reports" className="inline-flex items-center gap-2 text-sm text-amber-800 hover:underline dark:text-amber-300">
+          <ArrowLeft className="h-4 w-4" /> Saved browser reports
         </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Workbook imports</h1>
           <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-            Upload an Excel workbook, inspect the parsed transactions, and keep the original browser reports available.
+            Upload an Excel workbook, inspect its transactions, and explore AI insights.
           </p>
         </div>
 
@@ -183,6 +183,10 @@ export default function ImportPage() {
             {detailLoading ? <p role="status">Loading transactions…</p> : detailError ? <p role="alert" className="text-rose-700">{detailError}</p> : detail && <>
               <p className="text-sm">{detail.import_record.file_name} · {detail.import_record.status} · {detail.total} transactions</p>
               {detail.import_record.error_message && <p role="alert" className="text-sm text-rose-700">{detail.import_record.error_message}</p>}
+              {detail.import_record.status === "committed" && detail.import_record.source_row_count > detail.import_record.transaction_count &&
+                <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+                  {detail.import_record.source_row_count - detail.import_record.transaction_count} source rows were excluded from totals. These may include headers, totals, notes, or invalid entries. Check the workbook if expected transactions are missing.
+                </p>}
               <div className="grid gap-3 sm:grid-cols-2">
                 <p className="rounded-lg bg-emerald-50 p-3 text-sm dark:bg-emerald-950/30">Income <strong className="block text-lg">{money(detail.import_record.income_total)}</strong></p>
                 <p className="rounded-lg bg-rose-50 p-3 text-sm dark:bg-rose-950/30">Expense <strong className="block text-lg">{money(detail.import_record.expense_total)}</strong></p>

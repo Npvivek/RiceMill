@@ -1,6 +1,8 @@
 """Service behavior uses in-memory adapters; SQL commit rollback uses a fake session."""
 
+import hashlib
 from contextlib import contextmanager
+from dataclasses import replace
 from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
@@ -24,19 +26,30 @@ def result(import_id: UUID, status: str = "staged") -> ImportResult:
 class MemoryRepository:
     def __init__(self) -> None:
         self.records: dict[str, ImportResult] = {}
+        self.uploaders: dict[str, UUID] = {}
         self.failed: list[tuple[UUID, str]] = []
         self.commit_calls = 0
 
-    def reserve(self, _user: UUID, _name: str, file_hash: str, _size: int, upload) -> tuple[ImportResult, bool]:
+    def reserve(self, user: UUID, _name: str, file_hash: str, _size: int, upload) -> tuple[ImportResult, bool]:
         if file_hash in self.records:
-            return self.records[file_hash], True
+            existing = self.records[file_hash]
+            if existing.status == "failed" and self.uploaders[file_hash] == user:
+                retried = replace(existing, status="staged", error_code=None, error_message=None)
+                self.records[file_hash] = retried
+                return retried, False
+            return existing, True
         new = result(uuid4())
         upload(f"{WORKSPACE}/{new.id}.xlsx")
         self.records[file_hash] = new
+        self.uploaders[file_hash] = user
         return new, False
 
-    def mark_failed(self, _user: UUID, import_id: UUID, code: str, _message: str) -> None:
+    def mark_failed(self, _user: UUID, import_id: UUID, code: str, message: str) -> None:
         self.failed.append((import_id, code))
+        for key, value in self.records.items():
+            if value.id == import_id:
+                self.records[key] = replace(value, status="failed", error_code=code, error_message=message)
+                break
 
     def commit(self, _user: UUID, import_id: UUID, workbook) -> ImportResult:
         self.commit_calls += 1
@@ -87,7 +100,24 @@ def test_storage_failure_rolls_back_reservation_and_allows_retry() -> None:
     assert imported.status == "committed" and not duplicate
 
 
-def test_parse_failure_marks_import_failed_without_ledger_commit() -> None:
+def test_import_commits_valid_rows_when_other_rows_are_excluded() -> None:
+    repository = MemoryRepository()
+    service = ImportService(repository, MemoryStorage())
+    workbook = workbook_bytes("Income", [
+        ["Date", "Description", "Amount"],
+        ["31/02/2026", "Bad date", "10.00"],
+        ["01/09/2026", "Rice sale", "12.50"],
+        ["02/09/2026", "Transport advance", None],
+    ])
+    imported, duplicate = service.create_import(USER, "token", "book.xlsx", workbook)
+    assert imported.status == "committed" and not duplicate
+    assert imported.transaction_count == 1
+    assert imported.income_total == Decimal("12.50")
+    assert repository.failed == []
+    assert repository.commit_calls == 1
+
+
+def test_no_valid_transactions_marks_import_failed_without_ledger_commit() -> None:
     repository = MemoryRepository()
     service = ImportService(repository, MemoryStorage())
     invalid = workbook_bytes("Income", [["Date", "Description", "Amount"],
@@ -96,8 +126,29 @@ def test_parse_failure_marks_import_failed_without_ledger_commit() -> None:
         service.create_import(USER, "token", "book.xlsx", invalid)
     assert error.value.status_code == 422
     assert error.value.import_id == repository.failed[0][0]
-    assert repository.failed[0][1] == "invalid_date"
+    assert repository.failed[0][1] == "no_transactions"
     assert repository.commit_calls == 0
+
+
+def test_same_hash_failed_import_retries_without_another_row_or_upload() -> None:
+    repository, storage = MemoryRepository(), MemoryStorage()
+    content = valid_bytes()
+    staged, duplicate = repository.reserve(
+        USER, "book.xlsx", hashlib.sha256(content).hexdigest(), len(content),
+        lambda path: storage.upload(path, content, "token"),
+    )
+    assert not duplicate
+    repository.mark_failed(USER, staged.id, "invalid_date", "Old parser rejected the workbook.")
+    other_result, other_duplicate = repository.reserve(
+        uuid4(), "book.xlsx", hashlib.sha256(content).hexdigest(), len(content),
+        lambda _path: pytest.fail("another uploader must not replace the stored workbook"),
+    )
+    assert other_duplicate and other_result.status == "failed"
+
+    imported, duplicate = ImportService(repository, storage).create_import(USER, "token", "book.xlsx", content)
+
+    assert imported.id == staged.id and imported.status == "committed" and not duplicate
+    assert len(repository.records) == storage.calls == repository.commit_calls == 1
 
 
 def test_hash_hint_mismatch_rejected_before_storage() -> None:

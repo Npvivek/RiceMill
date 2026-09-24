@@ -1,5 +1,5 @@
-import { WorkbookDashboard } from "@/components/dashboard/workbook-dashboard";
+import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
-  return <WorkbookDashboard view="analyzer" />;
+  redirect("/import");
 }

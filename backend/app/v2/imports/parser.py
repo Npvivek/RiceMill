@@ -261,38 +261,49 @@ def _parse_sheet(name: str, rows: list[tuple[int, tuple[object, ...], frozenset[
             continue
         critical_columns = {date_column, description_column, amount_column, debit_column, credit_column}
         if formulas.intersection(index for index in critical_columns if index is not None):
-            raise ParseError("formula_value", f"{location}: a transaction field contains a formula; cached values may be stale.")
+            excluded.append(ExcludedRow(name, number, raw, "formula_value"))
+            continue
 
         date_value = _row_value(values, date_column)
         parsed_date = _date(date_value)
-        if split_amounts:
-            debit_value = _row_value(values, debit_column)
-            credit_value = _row_value(values, credit_column)
-            debit = _amount(debit_value, location)
-            credit = _amount(credit_value, location)
-            if debit and credit:
-                raise ParseError("ambiguous_direction", f"{location}: both debit and credit have amounts.")
-            signed_amount = debit if debit else credit if credit else None
-            direction: Direction = "expense" if debit else "income"
-        else:
-            amount_value = _row_value(values, amount_column)
-            signed_amount = _amount(amount_value, location)
-            direction = sheet_direction or "expense"
+        try:
+            if split_amounts:
+                debit_value = _row_value(values, debit_column)
+                credit_value = _row_value(values, credit_column)
+                debit = _amount(debit_value, location)
+                credit = _amount(credit_value, location)
+                if debit and credit:
+                    excluded.append(ExcludedRow(name, number, raw, "ambiguous_direction"))
+                    continue
+                signed_amount = debit if debit else credit if credit else None
+                direction: Direction = "expense" if debit else "income"
+            else:
+                amount_value = _row_value(values, amount_column)
+                signed_amount = _amount(amount_value, location)
+                direction = sheet_direction or "expense"
+        except ParseError as error:
+            excluded.append(ExcludedRow(name, number, raw, error.code))
+            continue
 
         if signed_amount is None and parsed_date is None:
             financial_values = (debit_value, credit_value) if split_amounts else (amount_value,)
             if not _empty(date_value) or any(not _empty(value) for value in financial_values):
-                raise ParseError("invalid_transaction", f"{location}: date or amount is invalid.")
+                excluded.append(ExcludedRow(name, number, raw, "invalid_transaction"))
+                continue
             excluded.append(ExcludedRow(name, number, raw, "non_transaction"))
             continue
         if signed_amount is None:
-            raise ParseError("missing_amount", f"{location}: dated entry has no usable amount.")
+            excluded.append(ExcludedRow(name, number, raw, "missing_amount"))
+            continue
         if parsed_date is None:
-            raise ParseError("invalid_date", f"{location}: amount has no valid date.")
+            excluded.append(ExcludedRow(name, number, raw, "invalid_date"))
+            continue
         if not description.strip():
-            raise ParseError("missing_description", f"{location}: amount has no description.")
+            excluded.append(ExcludedRow(name, number, raw, "missing_description"))
+            continue
         if len(description) > 2000:
-            raise ParseError("description_length", f"{location}: description exceeds 2,000 characters.")
+            excluded.append(ExcludedRow(name, number, raw, "description_length"))
+            continue
         if signed_amount == 0:
             excluded.append(ExcludedRow(name, number, raw, "zero_amount"))
             continue
@@ -305,7 +316,7 @@ def _parse_sheet(name: str, rows: list[tuple[int, tuple[object, ...], frozenset[
 
 
 def parse_workbook(content: bytes) -> ParsedWorkbook:
-    """Parse one .xlsx deterministically or raise ParseError before any ledger write."""
+    """Parse one .xlsx, retaining invalid rows for audit and rejecting unsafe workbooks."""
     _check_archive(content)
     try:
         workbook = load_workbook(BytesIO(content), read_only=True, data_only=False, keep_links=False)

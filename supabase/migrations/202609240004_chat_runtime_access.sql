@@ -29,7 +29,9 @@ do $$ begin
       with check (created_by = nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
         and public.is_workspace_member(workspace_id)
         and exists (select 1 from public.dataset_versions v join public.imports i on i.id = v.import_id
-          where v.id = dataset_version_id and v.workspace_id = workspace_id and i.workspace_id = workspace_id
+          where v.id = conversations.dataset_version_id
+            and v.workspace_id = conversations.workspace_id
+            and i.workspace_id = conversations.workspace_id
             and v.status = 'committed' and i.status = 'committed'));
   end if;
   if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'conversation_messages'
