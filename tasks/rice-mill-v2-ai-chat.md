@@ -1,6 +1,6 @@
 # AI chat and anomalies implementation
 
-**Spec:** [Conversational AI and Intelligent Anomalies](../specs/ai-chat-and-anomalies.md). **Status:** implementation in progress; production migration and manual UI test pending.
+**Spec:** [Conversational AI and Intelligent Anomalies](../specs/ai-chat-and-anomalies.md). **Status:** draft [PR #7](https://github.com/Npvivek/RiceMill/pull/7) prepared; production migration and manual UI test pending.
 
 - [x] Establish a review branch; verify the seven existing tools, scoped database access, import UI, and generated API contract. Preserve raw workbook and transaction rows.
 - [x] Pin the Postgres checkpointer dependency. Add an additive migration for conversation writes and separate LangGraph chat checkpoint tables, with membership-scoped RLS and least-privilege `mill_runtime` grants. Keep schema setup out of request startup.
@@ -10,7 +10,7 @@
 - [x] Add a generated-contract API client, chat component, and automatic anomaly panel on committed import details. Render citations as ledger links and distinguish AI observations, fallback, and validation failures.
 - [x] Add focused validator, graph, adapter, authorization, and API-route tests with synthetic rows and mocked provider; test foreign threads, forged references, malformed XML, numeric claims, rate limits, and provider failures.
 - [x] Run Ruff, mypy, pytest, OpenAPI/TypeScript drift check, frontend lint, and build. Fix all failures and inspect the final diff for secrets or unauthorized writes.
-- [ ] Update documentation index and deployment handoff with migration/env steps and unverified hosted gates. Commit on the branch, push, and prepare a reviewable PR without merging or deploying. Stop for the owner's manual end-to-end UI test.
+- [x] Update documentation index and deployment handoff with migration/env steps and unverified hosted gates. Commit on the branch, push, and prepare a reviewable PR without merging or deploying. Stop for the owner's manual end-to-end UI test.
 
 ## Deployment handoff
 
